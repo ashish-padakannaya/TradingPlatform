@@ -41,19 +41,27 @@ class getStock(APIView):
 
 		# setting nature and color of the stock data
 		for index, row in data.iterrows():
-			open = int(row.Open)
-			close = int(row.Close)
-			low = int(row.Low)
-			high = int(row.High)
+			open = row.Open
+			close = row.Close
+			low = row.Low
+			high = row.High
 
 			if close > open:
 				color = 'green'
 			else:
 				color = 'red'
 
-			total_length = high - low
 			stick_length = close - open
-			shadow_length = total_length - stick_length
+
+			upper_shadow_length = 0
+			lower_shadow_lenght = 0
+
+			if high > close:
+				upper_shadow_length = high - close
+			if low < open:
+				lower_shadow_lenght = open - low
+
+			shadow_length = upper_shadow_length + lower_shadow_lenght
 
 			if shadow_length >= stick_length:
 				nature = 'exciting'
@@ -105,9 +113,17 @@ class getPointer(APIView):
 			else:
 				color = 'red'
 
-			total_length = high - low
 			stick_length = close - open
-			shadow_length = total_length - stick_length
+
+			upper_shadow_length = 0
+			lower_shadow_lenght = 0
+
+			if high > close:
+				upper_shadow_length = high - close
+			if low < open:
+				lower_shadow_lenght = open - low
+
+			shadow_length = upper_shadow_length + lower_shadow_lenght
 
 			if shadow_length >= stick_length:
 				nature = 'exciting'
