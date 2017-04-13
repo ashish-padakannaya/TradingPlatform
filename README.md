@@ -10,15 +10,18 @@ Create a Virtual env to get started(NOTE: you need to run this only the first ti
 virtualenv env</code></pre>
 
 Next, Clone the repository in the home directory,activate the virtual environment and install the dependencies
-<pre><code>source env/bin/activate
-cd djangobackend
+<pre><code>
+source env/bin/activate
+cd TradingPlatform
 pip install requirements.txt</code></pre>
 
 Use this command if the dependenices weren't picked up for installation
 <pre><code>pip install --upgrade -r requirements.txt</code></pre>
 
 To run the server in development mode
-<pre><code>python manage.py runserver
+<pre><code>cd ~/TradingPlatform/djangobackend/
+python manage.py migrate
+python manage.py runserver
 </code></pre>
 
 
