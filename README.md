@@ -14,6 +14,9 @@ Next, Clone the repository in the home directory,activate the virtual environmen
 cd djangobackend
 pip install requirements.txt</code></pre>
 
+Use this command if the dependenices weren't picked up for installation
+<pre><code>pip install --upgrade -r requirements.txt</code></pre>
+
 To run the server in development mode
 <pre><code>python manage.py runserver
 </code></pre>
