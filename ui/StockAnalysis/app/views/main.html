@@ -1,0 +1,72 @@
+<div>
+<div class="fb-login-button" data-max-rows="1" data-size="icon" data-show-faces="false" data-auto-logout-link="false"></div>
+    <div class="input-group">
+        <input type="text" class="form-control" ng-model="scripCode" ng-change="dismissSearch=false">
+        <span class="input-group-btn">
+          <button class="btn btn-default" type="button" ng-click="getData()">Show History</button>
+          <button class="btn btn-default" type="button" ng-click="getTicker()">Generate Ticker</button>
+        </span>
+    </div>
+    <div>
+        <table ng-show="scripCode && !dismissSearch" class="table table-striped table-bordered">
+            <tr ng-repeat="scrip in nseCodesArray.data | filter:scripCode" ng-click="setScrip(scrip[0])">
+                <td>{{scrip[0]}}</td>
+                <td>{{scrip[1]}}</td>
+            </tr>
+        </table>
+    </div>
+    <br />
+    <div class="col-xs-3">
+        <input data-ng-model="startDate" type="text" date-picker="startDate" class="form-control" placeholder="Start Date: YYYY-MM-DD">
+    </div>
+    <div class="col-xs-3">
+        <input data-ng-model="endDate" class="form-control" type="text" placeholder="End Date: YYYY-MM-DD" date-picker="endDate">
+    </div>
+    <br />
+    <br />
+    <div ng-show="history">
+        <h3 ng-show="errorMessage" style="color: red">{{errorMessage}}</h3>
+        <div id="chartContainer" style="width:100%;height:300px;"></div>
+        <br />
+        <table class="table table-striped table-bordered">
+            <tr>
+                <td ng-repeat="columnName in data.dataset.column_names">{{columnName}}</td>
+            </tr>
+            <tr ng-repeat="dayData in data.dataset.data">
+                <td ng-repeat="value in dayData track by $index">
+                    {{value}}
+                </td>
+            </tr>
+        </table>
+    </div>
+    <br />
+    <div ng-show="ticker">
+        Entry : {{pointers.entry}} <br />
+        Target : {{pointers.target}} <br />
+        Stoploss : {{pointers.stopLoss}} <br />
+    </div>
+    <br /><br />
+    <div ng-show="ticker">
+        <table class="table table-striped table-bordered">
+            <tr>
+                <td> Date </td>
+                <td> Open </td>
+                <td> Low </td>
+                <td> High </td>
+                <td> Close </td>
+                <td> Nature </td>
+                <td> Color </td>
+            </tr>
+            <tr ng-repeat="dayData in tickerData">
+                <td>{{dayData.Date}}</td>
+                <td>{{dayData.Open}}</td>
+                <td>{{dayData.Low}}</td>
+                <td>{{dayData.High}}</td>
+                <td>{{dayData.Close}}</td>
+                <td style="text-transform: uppercase;">{{dayData.nature}}</td>
+                <td ng-if="dayData.color == 'green'" style="background-color: green;text-transform: uppercase;">{{dayData.color}}</td>
+                <td ng-if="dayData.color == 'red'" style="background-color: red;text-transform: uppercase;">{{dayData.color}}</td>
+            </tr>
+        </table>
+    </div>
+</div>
