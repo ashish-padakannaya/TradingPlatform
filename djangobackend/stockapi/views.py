@@ -51,22 +51,31 @@ class getStock(APIView):
 			else:
 				color = 'red'
 
-			stick_length = close - open
+			if close > open:
+				body_length = close - open
+			if open > close:
+				body_length = open - close
 
-			upper_shadow_length = 0
-			lower_shadow_lenght = 0
+			upper_stick_length = 0
+			lower_stick_length = 0
 
 			if high > close:
-				upper_shadow_length = high - close
+				if color is 'green':
+					upper_stick_length = high - close
+				else:
+					upper_stick_length = high - open
 			if low < open:
-				lower_shadow_lenght = open - low
+				if color is 'green':
+					lower_stick_length = open - low
+				else:
+					lower_stick_length = close - open
 
-			shadow_length = upper_shadow_length + lower_shadow_lenght
+			stick_length = upper_stick_length + lower_stick_length
 
-			if shadow_length >= stick_length:
-				nature = 'exciting'
-			else:
+			if stick_length >= body_length:
 				nature = 'boring'
+			else:
+				nature = 'exciting'
 
 			data.set_value(index, 'color', color)
 			data.set_value(index, 'nature', nature)
@@ -149,10 +158,13 @@ class getPointer(APIView):
 					continue
 
 			if P1 and not P2:
-				if nature == 'boring':
+				if nature == 'boring' and index == (P1index + 1):
 					P2 = True
 					P2index = index
 					continue
+				else:
+					P1 = False
+					P1index = None
 
 			if P1 and P2 and not P3:
 				if nature == 'exciting':
@@ -166,7 +178,7 @@ class getPointer(APIView):
 		print P1index
 		print P2index
 		print P3index
-		print 'sasa'
+		print 'pointers found'
 
 		# pointers found, now to find the data
 		entry = 0
