@@ -203,7 +203,7 @@ class getPointer(APIView):
 
 		print stopLoss
 
-		target = (entry - stopLoss) * 2
+		target = ((entry - stopLoss) * 2) + entry
 
 		data_to_return = {'entry': entry, 'stopLoss': stopLoss, 'target': target}
 
