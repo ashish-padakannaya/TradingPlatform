@@ -227,7 +227,6 @@ class getPointer(APIView):
 			if stopLoss is None or stopLoss_at_index < stopLoss:
 				stopLoss = float(stopLoss_at_index)
 					#stopLossIndex = index
-
 		# print data.loc[[stopLossIndex]]
 
 		# print stopLoss
