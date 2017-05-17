@@ -92,6 +92,7 @@ REST_FRAMEWORK = {
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 try:
     if os.environ['DJANGOENV'] == 'prod':
+        print 'running PROD'
         DATABASES = {
             'default': {
                 'ENGINE': 'django.db.backends.postgresql',
@@ -103,6 +104,7 @@ try:
             }
         }
     if os.environ['DJANGOENV'] == 'qa':
+        print 'running QA'
         DATABASES = {
             'default': {
                 'ENGINE': 'django.db.backends.postgresql',
