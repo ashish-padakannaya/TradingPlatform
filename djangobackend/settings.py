@@ -90,26 +90,41 @@ REST_FRAMEWORK = {
 
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'd41hn3nmqj59mj',
-        'USER': 'cxuazrriajgxck',
-        'PASSWORD': '82148144f1b692e97575a0032adfb8da72ba7abcb4ce6fdd952117055758703a',
-        'HOST': 'ec2-54-235-119-27.compute-1.amazonaws.com',
-        'PORT': '5432',
-    },
-    'qa': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'd97kd12l7m174t',
-        'USER': 'kkppagovrjzfwt',
-        'PASSWORD': '705c84b75f16eb5deee3400c041f1063c0adff2ec46ac5e254de1416f781098c',
-        'HOST': 'ec2-107-21-205-25.compute-1.amazonaws.com',
-        'PORT': '5432',
+try:
+    if os.environ['DJANGOENV'] == 'prod':
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': 'd41hn3nmqj59mj',
+                'USER': 'cxuazrriajgxck',
+                'PASSWORD': '82148144f1b692e97575a0032adfb8da72ba7abcb4ce6fdd952117055758703a',
+                'HOST': 'ec2-54-235-119-27.compute-1.amazonaws.com',
+                'PORT': '5432',
+            }
+        }
+    if os.environ['DJANGOENV'] == 'qa':
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': 'd97kd12l7m174t',
+                'USER': 'kkppagovrjzfwt',
+                'PASSWORD': '705c84b75f16eb5deee3400c041f1063c0adff2ec46ac5e254de1416f781098c',
+                'HOST': 'ec2-107-21-205-25.compute-1.amazonaws.com',
+                'PORT': '5432',
+            }
+        }
+except Exception as e:
+    print e
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+            'USER': '',
+            'PASSWORD': '',
+            'HOST': '',
+            'PORT': '',
+        }
     }
-}
-
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
@@ -152,7 +167,7 @@ JWT_AUTH = {
     'JWT_VERIFY': True,
     'JWT_VERIFY_EXPIRATION': True,
     'JWT_LEEWAY': 0,
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(hours=0.5),
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(hours=3),
     'JWT_AUDIENCE': None,
     'JWT_ISSUER': None,
 
