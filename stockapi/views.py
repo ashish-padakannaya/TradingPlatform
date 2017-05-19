@@ -135,7 +135,6 @@ class getStock(APIView):
 
 class getPointer(APIView):
 	def post(self, request, format=None):
-		print request.data
 		multiplier = 2
 		if 'multiplier' in request.data:
 			multiplier = float(request.data['multiplier'])
@@ -157,82 +156,195 @@ class getPointer(APIView):
 		data = data.iloc[::-1]
 		data.reset_index(inplace=True)
 
-		P1 = False
-		P2 = False
-		P3 = False
-		P1index = None
-		P2index = None
-		P3index = None
+		
+		phase2Pointers = {
+			'Freshness': 0,
+			'Trend': 0,
+			'Gap up': 0,
+			'Time Spend': 0,
+			'High': 0,
+			'Divident': 0,
+			'Earning': 0
+		}
 
-		for index, row in data.iterrows():
-			nature, color = getNatureAndColor(row)
+		# $$$$$$$$$$$$$$$$$$$$$
+		# Finding first pointer (entry > low)
+		# $$$$$$$$$$$$$$$$$$$$$
+		startPoint = 0
+		lowAfterEntry = None
+		entryFound = False
+		limitReached = False
+		entryIndex = 0
 
-			# if lowAfterEntry is None or row.Low < lowAfterEntry:
-			# 	lowAfterEntry = row.Low
+		while not entryFound and not limitReached and len(data) != 0:
 
-			data.set_value(index, 'color', color)
-			data.set_value(index, 'nature', nature)
+			P1 = False
+			P2 = False
+			P3 = False
+			P1index = None
+			P2index = None
+			P3index = None
 
-			if not P1:
-				if color == 'green' and nature == 'exciting':
-					P1 = True
-					P1index = index
-					continue
+			for index, row in data[startPoint:].iterrows():
+				nature, color = getNatureAndColor(row)
 
-			if P1 and not P2:
-				if nature == 'boring' and index == (P1index + 1):
-					P2 = True
-					P2index = index
-					continue
-				else:
-					P1 = False
-					P1index = None
+				# if lowAfterEntry is None or row.Low < lowAfterEntry:
+				# 	lowAfterEntry = row.Low
 
-			if P1 and P2 and not P3:
-				if nature == 'exciting':
-					P3 = True
-					P3index = index
-					continue
+				data.set_value(index, 'color', color)
+				data.set_value(index, 'nature', nature)
 
+				if not P1:
+					if color == 'green' and nature == 'exciting':
+						P1 = True
+						P1index = index
+						continue
+
+				if P1 and not P2:
+					if nature == 'boring' and index == (P1index + 1):
+						P2 = True
+						P2index = index
+						continue
+					else:
+						P1 = False
+						P1index = None
+
+				if P1 and P2 and not P3:
+					if nature == 'exciting':
+						P3 = True
+						P3index = index
+						continue
+
+				if P1 and P2 and P3:
+					break
+
+				if index == len(data) - 1:
+					limitReached = True
+
+			# pointers found, now to find the data
 			if P1 and P2 and P3:
+				entry = 0
+				entryAtIndex = 0
+				for index, row in data[P2index:P3index].iterrows():
+					if row.nature == 'boring':
+						# entry_at_index = row.High
+						entryAtIndex = max(row.Open, row.Close)
+						if entryAtIndex > entry:
+							entry = float(entryAtIndex)
+							entryIndex = index
+
+				#finding lowest low
+				for index, row in data[:entryIndex].iterrows():
+					if lowAfterEntry is None or row.Low < lowAfterEntry:
+						lowAfterEntry = row.Low
+
+				if entry > lowAfterEntry:
+					print entry
+					print lowAfterEntry
+					print '$$$$'
+					startPoint = entryIndex
+				else:
+					entryFound = True
+					print entry
+					print lowAfterEntry
+					print P1index
+					print P2index
+					print P3index
+					print '$$$$'
+					stopLoss = None
+					stopLossAtIndex = 0
+					#stopLossIndex = 0
+					for index, row in data[P1index:P3index].iterrows():
+						# if (row.color == 'green' and row.nature == 'exciting') or (row.nature == 'boring'):
+						stopLossAtIndex = row.Low
+						if stopLoss is None or stopLossAtIndex < stopLoss:
+							stopLoss = float(stopLossAtIndex)
+						# print stopLoss
+
+					target = ((entry - stopLoss) * multiplier) + entry
+					phase2Pointers['Freshness'] = 1
+
+		if not entryFound:
+			entry = None
+			stopLoss = None
+			target = None
+		data.to_csv('head.csv', index=False)
+
+		# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+		# Finding pointer 2
+		# if 7th week avg<= current week avg then 1
+		# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+		lastWeekFound = None
+		weekAverage = {}
+		for index, row in data.iterrows():
+			week = row.Date.isocalendar()[1]
+			if week not in weekAverage:
+				weekAverage[week] = []
+				weekAverage[week].append(row.Close)
+			else:
+				weekAverage[week].append(row.Close)
+			lastWeekFound = week
+			if len(weekAverage.keys()) > 7:
 				break
+		if lastWeekFound is not None:
+			del weekAverage[lastWeekFound]
+		if len(weekAverage.keys()) == 7:
+			averages = []
+			for week in weekAverage.keys():
+				closeList = weekAverage[week]
+				averages.append(sum(closeList) / float(len(closeList)))
+			if(averages[6] <= averages[0]):
+				phase2Pointers['Trend'] = 1
 
-		if not P1 and not P2 and not P3:
-			return Response({'entry': None, 'stopLoss': None, 'target': None})
+		# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+		# Pointer 3 should be green
+		# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+		if entryFound:
+			if data.iloc[P3index].color == 'green':
+				phase2Pointers['Gap up'] += 1
 
-		# if index == len(data) - 1:
-		# 	endOfDataHit = True
+		# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+		# While finding pointer 1 and 2 if the low of the excting body(open) > immidiate boring candle body high (open if it is red else close)
+		# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+		if entryFound:
+			excitingBodyLow = data.iloc[P1index].Open
+			colorOfNextBoringCandle = data.iloc[P1index + 1].color
+			if colorOfNextBoringCandle == 'green':
+				if excitingBodyLow > data.iloc[P1index + 1].Close:
+					phase2Pointers['Gap up'] += 1
+			else:
+				if excitingBodyLow > data.iloc[P1index + 1].Open:
+					phase2Pointers['Gap up'] += 1
 
-		# print P1index
-		# print data.loc[[P1index]]
-		# print P2index
-		# print data.loc[[P2index]]
-		# print P3index
-		# print data.loc[[P3index]]
-		# print 'pointers found'
+		# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+		# number of boring candles between green excing and exciting pointer 2 and 3
+		# <=3 then 2 points
+		# >3 and <=6 then 1 points
+		# otherwise 0
+		# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+		if entryFound:
+			boringCandleCount = P3index - P1index - 1
+			if boringCandleCount <= 3:
+				phase2Pointers['Time Spend'] += 2
+			if 3 < boringCandleCount <= 6:
+				phase2Pointers['Time Spend'] += 1
 
-		# pointers found, now to find the data
-		entry = 0
-		entry_at_index = 0
-		for index, row in data[P2index:P3index].iterrows():
-			if row.nature == 'boring':
-				# entry_at_index = row.High
-				entry_at_index = max(row.Open, row.Close)
-				if entry_at_index > entry:
-					entry = float(entry_at_index)
+		# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+		# Find the high before the entry
+		# Entry + (Entry-stop loss)*6 >=High -> 2 poits
+		# Entry + (Entry-stop loss)*4 >=High -> 1 points
+		# otherwise 0
+		# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+		if entryFound:
+			high = 0
+			for index, row in data[:entryIndex].iterrows():
+				if row.High > high:
+					high = row.High
+			if (entry + (entry - stopLoss) * 6) >= high:
+				phase2Pointers['High'] += 2
+			elif (entry + (entry - stopLoss) * 4) >= high:
+				phase2Pointers['High'] += 1
 
-		stopLoss = None
-		stopLossAtIndex = 0
-		#stopLossIndex = 0
-		for index, row in data[P1index:P3index].iterrows():
-			# if (row.color == 'green' and row.nature == 'exciting') or (row.nature == 'boring'):
-			stopLossAtIndex = row.Low
-			if stopLoss is None or stopLossAtIndex < stopLoss:
-				stopLoss = float(stopLossAtIndex)
-			# print stopLoss
-
-		target = ((entry - stopLoss) * multiplier) + entry
-
-		data_to_return = {'entry': entry, 'stopLoss': stopLoss, 'target': target}
-
+		totalPoints = sum(phase2Pointers.values())
+		data_to_return = {'entry': entry, 'stopLoss': stopLoss, 'target': target, 'pointers': phase2Pointers, 'totalPoints': totalPoints}
 		return Response(data_to_return)
