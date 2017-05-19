@@ -135,7 +135,7 @@ class getStock(APIView):
 
 class getPointer(APIView):
 	def post(self, request, format=None):
-		multiplier = 2
+		multiplier = 3
 		if 'multiplier' in request.data:
 			multiplier = float(request.data['multiplier'])
 		if 'ticker' in request.data:
@@ -156,7 +156,6 @@ class getPointer(APIView):
 		data = data.iloc[::-1]
 		data.reset_index(inplace=True)
 
-		
 		phase2Pointers = {
 			'Freshness': 0,
 			'Trend': 0,
