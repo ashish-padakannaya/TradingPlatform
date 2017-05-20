@@ -10,7 +10,9 @@ import pandas as pd
 import zipfile
 import wget
 import os
-
+from rest_framework_tracking.mixins import LoggingMixin
+from rest_framework_tracking.models import APIRequestLog
+import ast
 
 import quandl
 # quandl.ApiConfig.api_key = 'VHeUNLxuAngRYDgtjD9X'
@@ -55,7 +57,7 @@ def getNatureAndColor(row):
 
 
 #create User programmatically
-class createUser(generics.ListCreateAPIView):
+class createUser(LoggingMixin, generics.ListCreateAPIView):
 	authentication_classes = []
 	permission_classes = []
 
@@ -72,7 +74,21 @@ class createUser(generics.ListCreateAPIView):
 		return Response('success')
 
 
-class getAllStocks(generics.ListCreateAPIView):
+#get popular tickers for a user
+class getPopularTickers(generics.ListCreateAPIView):
+	def get(self, request, format=None):
+		history = APIRequestLog.objects.all().filter(user=request.user, path='/pointers/', status_code=200)
+		tickerCount = {}
+		for item in history:
+			ticker = ast.literal_eval(item.__dict__['data'])['ticker']
+			if ticker not in tickerCount:
+				tickerCount[ticker] = 1
+			else:
+				tickerCount[ticker] += 1
+		return Response(tickerCount)
+
+
+class getAllStocks(LoggingMixin, generics.ListCreateAPIView):
 	# queryset = stockData.objects.all()
 	# serializer_class = stockSerializer
 	def get(self, request, format=None):
@@ -95,7 +111,7 @@ class getAllStocks(generics.ListCreateAPIView):
 		return Response(data.T.to_dict().values())
 
 
-class getStock(APIView):
+class getStock(LoggingMixin, APIView):
 	def post(self, request, format=None):
 		print request.data
 		ticker = request.data['ticker']
@@ -133,7 +149,7 @@ class getStock(APIView):
 		return Response(data)
 
 
-class getPointer(APIView):
+class getPointer(LoggingMixin, APIView):
 	def post(self, request, format=None):
 		multiplier = 3
 		if 'multiplier' in request.data:

@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'rest_framework_jwt',
-    'stockapi'
+    'stockapi',
+    'rest_framework_tracking'
 ]
 
 MIDDLEWARE = [
