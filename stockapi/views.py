@@ -191,6 +191,7 @@ class getPointer(LoggingMixin, APIView):
 		limitReached = False
 		entryIndex = 0
 
+		print len(data)
 		while not entryFound and not limitReached and len(data) != 0:
 
 			P1 = False
@@ -230,11 +231,11 @@ class getPointer(LoggingMixin, APIView):
 						P3index = index
 						continue
 
-				if P1 and P2 and P3:
-					break
-
 				if index == len(data) - 1:
 					limitReached = True
+
+				if P1 and P2 and P3:
+					break
 
 			# pointers found, now to find the data
 			if P1 and P2 and P3:
@@ -254,17 +255,9 @@ class getPointer(LoggingMixin, APIView):
 						lowAfterEntry = row.Low
 
 				if entry > lowAfterEntry:
-					print entry
-					print lowAfterEntry
-					print '$$$$'
 					startPoint = entryIndex
 				else:
 					entryFound = True
-					print entry
-					print lowAfterEntry
-					print P1index
-					print P2index
-					print P3index
 					print '$$$$'
 					stopLoss = None
 					stopLossAtIndex = 0
@@ -283,7 +276,7 @@ class getPointer(LoggingMixin, APIView):
 			entry = None
 			stopLoss = None
 			target = None
-		data.to_csv('head.csv', index=False)
+		# data.to_csv('head.csv', index=False)
 
 		# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 		# Finding pointer 2

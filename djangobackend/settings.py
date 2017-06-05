@@ -39,7 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'rest_framework',
-    'rest_framework_jwt',
+    # 'rest_framework_jwt',
+    'rest_framework.authtoken',
+    'djoser',
     'stockapi',
     'rest_framework_tracking'
 ]
@@ -53,7 +55,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware'
+    'django.middleware.common.CommonMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware'
 ]
 
 ROOT_URLCONF = 'djangobackend.urls'
@@ -84,6 +87,7 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        # 'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ),
@@ -117,7 +121,6 @@ try:
             }
         }
 except Exception as e:
-    print e
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -146,6 +149,24 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'infinv.investments@gmail.com'
+EMAIL_HOST_PASSWORD = 'infinv123'
+
+DJOSER = {
+    'PASSWORD_RESET_CONFIRM_URL': '#/password/reset/confirm/{uid}/{token}',
+    'ACTIVATION_URL': '#/activate/{uid}/{token}',
+    'SEND_ACTIVATION_EMAIL': True,
+    'PASSWORD_VALIDATORS': [],
+    'LOGOUT_ON_PASSWORD_CHANGE': True,
+    'SERIALIZERS': {},
+    'PASSWORD_RESET_CONFIRM_URL': '#/password-reset/{uid}/{token}',
+    'SITE_NAME': 'Infinv Investments',
+    'DOMAIN': 'test.com'
+}
 
 JWT_AUTH = {
     'JWT_ENCODE_HANDLER':
