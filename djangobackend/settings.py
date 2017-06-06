@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'djoser',
     'stockapi',
+    'util',
     'rest_framework_tracking'
 ]
 
@@ -157,13 +158,12 @@ EMAIL_HOST_USER = 'infinv.investments@gmail.com'
 EMAIL_HOST_PASSWORD = 'infinv123'
 
 DJOSER = {
-    'PASSWORD_RESET_CONFIRM_URL': '#/password/reset/confirm/{uid}/{token}',
-    'ACTIVATION_URL': '#/activate/{uid}/{token}',
+    'ACTIVATION_URL': '#/activate?uid={uid}&token={token}',
     'SEND_ACTIVATION_EMAIL': True,
     'PASSWORD_VALIDATORS': [],
     'LOGOUT_ON_PASSWORD_CHANGE': True,
     'SERIALIZERS': {},
-    'PASSWORD_RESET_CONFIRM_URL': '#/password-reset/{uid}/{token}',
+    'PASSWORD_RESET_CONFIRM_URL': '#/password-reset?uid={uid}&token={token}',
     'SITE_NAME': 'Infinv Investments',
     'DOMAIN': 'test.com'
 }

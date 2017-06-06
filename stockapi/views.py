@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
 from rest_framework import generics, status
 #from stockapi.models import stockData
 from rest_framework.response import Response
@@ -54,24 +54,6 @@ def getNatureAndColor(row):
 		nature = 'exciting'
 
 	return nature, color
-
-
-#create User programmatically
-class createUser(LoggingMixin, generics.ListCreateAPIView):
-	authentication_classes = []
-	permission_classes = []
-
-	def post(self, request, format=None):
-		try:
-			username = str(request.data['username'])
-			email = str(request.data['email'])
-			password = str(request.data['password'])
-			user = User.objects.create_user(username, email, password)
-		except Exception as e:
-			return Response(e.message, status=status.HTTP_400_BAD_REQUEST)
-		user.save()
-
-		return Response('success')
 
 
 #get popular tickers for a user
@@ -203,9 +185,6 @@ class getPointer(LoggingMixin, APIView):
 
 			for index, row in data[startPoint:].iterrows():
 				nature, color = getNatureAndColor(row)
-
-				# if lowAfterEntry is None or row.Low < lowAfterEntry:
-				# 	lowAfterEntry = row.Low
 
 				data.set_value(index, 'color', color)
 				data.set_value(index, 'nature', nature)
