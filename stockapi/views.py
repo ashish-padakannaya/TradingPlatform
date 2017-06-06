@@ -189,6 +189,9 @@ class getPointer(LoggingMixin, APIView):
 				data.set_value(index, 'color', color)
 				data.set_value(index, 'nature', nature)
 
+				if index == len(data) - 1:
+					limitReached = True
+
 				if not P1:
 					if color == 'green' and nature == 'exciting':
 						P1 = True
@@ -209,9 +212,6 @@ class getPointer(LoggingMixin, APIView):
 						P3 = True
 						P3index = index
 						continue
-
-				if index == len(data) - 1:
-					limitReached = True
 
 				if P1 and P2 and P3:
 					break
@@ -237,7 +237,6 @@ class getPointer(LoggingMixin, APIView):
 					startPoint = entryIndex
 				else:
 					entryFound = True
-					print '$$$$'
 					stopLoss = None
 					stopLossAtIndex = 0
 					#stopLossIndex = 0
@@ -255,7 +254,6 @@ class getPointer(LoggingMixin, APIView):
 			entry = None
 			stopLoss = None
 			target = None
-		# data.to_csv('head.csv', index=False)
 
 		# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 		# Finding pointer 2
@@ -264,23 +262,29 @@ class getPointer(LoggingMixin, APIView):
 		lastWeekFound = None
 		weekAverage = {}
 		for index, row in data.iterrows():
+			# gives week number of the year
 			week = row.Date.isocalendar()[1]
+
 			if week not in weekAverage:
 				weekAverage[week] = []
 				weekAverage[week].append(row.Close)
 			else:
 				weekAverage[week].append(row.Close)
 			lastWeekFound = week
+
+			# break after finding 8th week
 			if len(weekAverage.keys()) > 7:
 				break
+
 		if lastWeekFound is not None:
 			del weekAverage[lastWeekFound]
+			seventhWeek = lastWeekFound + 1
+			currentWeek = seventhWeek + 6
 		if len(weekAverage.keys()) == 7:
-			averages = []
-			for week in weekAverage.keys():
-				closeList = weekAverage[week]
-				averages.append(sum(closeList) / float(len(closeList)))
-			if(averages[6] <= averages[0]):
+			seventhAverage = sum(weekAverage[seventhWeek]) / float(len(weekAverage[seventhWeek]))
+			currentAverage = sum(weekAverage[currentWeek]) / float(len(weekAverage[currentWeek]))
+
+			if seventhAverage <= currentAverage:
 				phase2Pointers['Trend'] = 1
 
 		# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
