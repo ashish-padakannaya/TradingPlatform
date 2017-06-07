@@ -167,7 +167,7 @@ DJOSER = {
     'SERIALIZERS': {},
     'PASSWORD_RESET_CONFIRM_URL': '#/password-reset?uid={uid}&token={token}',
     'SITE_NAME': 'Infinv Investments',
-    'DOMAIN': 'analysestock-qa.herokuapp.com/'
+    'DOMAIN': 'analysestock-qa.herokuapp.com'
 }
 
 JWT_AUTH = {
