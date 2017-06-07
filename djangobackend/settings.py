@@ -132,6 +132,7 @@ except Exception as e:
             'PORT': '',
         }
     }
+    # removing validation checks
     REST_FRAMEWORK = {}
 
 # Password validation
@@ -159,7 +160,7 @@ EMAIL_HOST_USER = 'infinv.investments@gmail.com'
 EMAIL_HOST_PASSWORD = 'infinv123'
 
 DJOSER = {
-    'ACTIVATION_URL': '#/activate?uid={uid}&token={token}',
+    'ACTIVATION_URL': 'https://analysestock-qa.herokuapp.com/#!/activateUser?uid={uid}&token={token}',
     'SEND_ACTIVATION_EMAIL': True,
     'PASSWORD_VALIDATORS': [],
     'LOGOUT_ON_PASSWORD_CHANGE': True,

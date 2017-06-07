@@ -322,7 +322,7 @@ class getPointer(LoggingMixin, APIView):
 
 		# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 		# Find the high before the entry
-		# Entry + (Entry-stop loss)*6 >=High -> 2 poits
+		# Entry + (Entry-stop loss)*6 >=High -> 2 points
 		# Entry + (Entry-stop loss)*4 >=High -> 1 points
 		# otherwise 0
 		# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
