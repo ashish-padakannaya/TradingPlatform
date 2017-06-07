@@ -160,14 +160,14 @@ EMAIL_HOST_USER = 'infinv.investments@gmail.com'
 EMAIL_HOST_PASSWORD = 'infinv123'
 
 DJOSER = {
-    'ACTIVATION_URL': 'https://analysestock-qa.herokuapp.com/#!/activateUser/?uid={uid}&token={token}',
+    'ACTIVATION_URL': '#!/activateUser/?uid={uid}&token={token}',
     'SEND_ACTIVATION_EMAIL': True,
     'PASSWORD_VALIDATORS': [],
     'LOGOUT_ON_PASSWORD_CHANGE': True,
     'SERIALIZERS': {},
     'PASSWORD_RESET_CONFIRM_URL': '#/password-reset?uid={uid}&token={token}',
     'SITE_NAME': 'Infinv Investments',
-    'DOMAIN': 'test.com'
+    'DOMAIN': 'https://analysestock-qa.herokuapp.com/'
 }
 
 JWT_AUTH = {
