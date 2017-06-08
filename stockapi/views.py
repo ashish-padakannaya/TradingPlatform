@@ -126,6 +126,14 @@ class getStock(LoggingMixin, APIView):
 			data.set_value(index, 'color', color)
 			data.set_value(index, 'nature', nature)
 
+			# changing datetime to epoch
+			pyDateTimeObj = row.Date.to_pydatetime()
+			epoch = (pyDateTimeObj - datetime(1970, 1, 1)).total_seconds()
+			data.set_value(index, 'Date1', epoch)
+
+		del data['Date']
+		data.rename(columns={'Date1': 'Date'}, inplace=True)
+
 		data = data.T.to_dict().values()
 
 		return Response(data)
