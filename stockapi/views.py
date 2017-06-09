@@ -57,7 +57,7 @@ def getNatureAndColor(row):
 
 
 #get popular tickers for a user
-class getPopularTickers(generics.ListCreateAPIView):
+class getPopularTickers(LoggingMixin, generics.ListCreateAPIView):
 	def get(self, request, format=None):
 		history = APIRequestLog.objects.all().filter(user=request.user, path='/pointers/', status_code=200)
 		tickerCount = {}
