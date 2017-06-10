@@ -59,7 +59,7 @@ def getNatureAndColor(row):
 #get popular tickers for a user
 class getPopularTickers(LoggingMixin, generics.ListCreateAPIView):
 	def get(self, request, format=None):
-		history = APIRequestLog.objects.all().filter(user=request.user, path='/pointers/', status_code=200)
+		history = APIRequestLog.objects.all().filter(user=request.user.id, path='/pointers/', status_code=200)
 		tickerCount = {}
 		for item in history:
 			ticker = ast.literal_eval(item.__dict__['data'])['ticker']

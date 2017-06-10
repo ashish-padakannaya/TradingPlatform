@@ -6,7 +6,7 @@ from rest_framework import generics
 from rest_framework.response import Response
 from util.serializers import userSerializer
 from util.models import Profile
-from django.http import JsonResponse
+
 
 # Create your views here.
 class checkIfEmailExists(generics.ListCreateAPIView):
@@ -25,7 +25,7 @@ class checkIfEmailExists(generics.ListCreateAPIView):
 		return Response(True)
 
 
-class proflieList(generics.ListCreateAPIView):
+class profileList(generics.ListCreateAPIView):
 	queryset = Profile.objects.all()
 	serializer_class = userSerializer
 
@@ -34,7 +34,20 @@ class profileDetails(generics.RetrieveUpdateDestroyAPIView):
 	queryset = Profile.objects.all()
 	serializer_class = userSerializer
 
-	# def get(self, request, pk):
-	# 	user = request.user
-	# 	serializer = userSerializer(Profile.objects.get(user=user))
-	# 	return Response(serializer.data)
+	def get(self, request, pk, format=None):
+		user = request.user
+		prof = Profile.objects.get(user=pk)
+		serializer = userSerializer(prof)
+		return Response(serializer.data)
+
+	# def put(self, request, pk, format=None):
+	# 	print pk
+	# 	prof = Profile.objects.get(user_id=pk)
+	# 	print request.data
+	# 	requestData = request.data
+	# 	requestData['user'] = prof
+	# 	serializer = userSerializer(prof, data=request.data)
+	# 	if serializer.is_valid():
+	# 		serializer.save()
+	# 		return Response(serializer.data)
+	# 	return Response(serializer.errors)
