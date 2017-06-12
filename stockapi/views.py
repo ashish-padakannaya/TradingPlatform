@@ -254,8 +254,10 @@ class getPointer(LoggingMixin, APIView):
 						if stopLoss is None or stopLossAtIndex < stopLoss:
 							stopLoss = float(stopLossAtIndex)
 						# print stopLoss
-
 					target = ((entry - stopLoss) * multiplier) + entry
+					entry = round(entry, 2)
+					target = round(target, 2)
+					stopLoss = round(stopLoss, 2)
 					phase2Pointers['Freshness'] = 1
 
 		if not entryFound:
