@@ -124,12 +124,12 @@ try:
 except Exception as e:
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-            'USER': '',
-            'PASSWORD': '',
-            'HOST': '',
-            'PORT': '',
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'infinv',
+            'USER': 'postgres',
+            'PASSWORD': 'root',
+            'HOST': 'localhost',
+            'PORT': '5432',
         }
     }
     # removing validation checks
