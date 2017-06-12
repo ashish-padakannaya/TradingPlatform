@@ -30,5 +30,6 @@ pytz==2017.2
 Quandl==3.1.0
 requests==2.13.0
 six==1.10.0
+SQLAlchemy==1.1.10
 wget==3.2
 whitenoise==3.3.0
