@@ -13,7 +13,7 @@ class stockData(models.Model):
 	close = models.FloatField()
 	high = models.FloatField()
 	low = models.FloatField()
-	# date = models.BigIntegerField()
+	date = models.BigIntegerField()
 	nature = models.CharField(default='exciting', max_length=20, editable=False)
 	color = models.CharField(default='red', max_length=20, editable=False)
 
