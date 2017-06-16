@@ -152,9 +152,12 @@ stock_dataframes = []
 
 #fetching pointers for all tickers
 for ticker in tickers.Code.tolist():
-    dateYearAgo = (datetime.now() - timedelta(days=365)).strftime('%Y-%m-%d')
-    data = quandl.get('NSE/' + ticker, start_date=dateYearAgo)
-    data = shapeData(data, ticker)
+    try:
+        dateYearAgo = (datetime.now() - timedelta(days=365)).strftime('%Y-%m-%d')
+        data = quandl.get('NSE/' + ticker, start_date=dateYearAgo)
+        data = shapeData(data, ticker)
+    except Exception:
+        continue
     multiplier = 2
 #     print data
     phase2Pointers = {
