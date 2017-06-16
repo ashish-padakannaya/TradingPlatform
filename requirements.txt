@@ -6,6 +6,7 @@ Django==1.11
 django-cors-headers==2.0.2
 django-filter==1.0.2
 djangorestframework==3.4.6
+djangorestframework-bulk==0.2.1
 djangorestframework-jwt==1.10.0
 djoser==0.5.4
 drf-tracking==1.2.0

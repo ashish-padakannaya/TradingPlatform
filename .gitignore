@@ -3,3 +3,8 @@ dataset.zip
 NSE-datasets-codes.csv
 db.sqlite3
 head.csv
+
+*.ipynb
+
+*.pyc
+

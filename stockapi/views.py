@@ -2,7 +2,8 @@
 from __future__ import unicode_literals
 # from django.contrib.auth.models import User
 from rest_framework import generics, status
-#from stockapi.models import stockData
+from stockapi.models import userInterests, tickers, pointers
+from stockapi.serializers import userInterestSerializer, tickerSerializer, pointerSerializer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from datetime import datetime, timedelta
@@ -12,7 +13,9 @@ import wget
 import os
 from rest_framework_tracking.mixins import LoggingMixin
 from rest_framework_tracking.models import APIRequestLog
+from rest_framework_bulk import ListBulkCreateUpdateDestroyAPIView
 import ast
+
 
 import quandl
 # quandl.ApiConfig.api_key = 'VHeUNLxuAngRYDgtjD9X'
@@ -70,27 +73,27 @@ class getPopularTickers(LoggingMixin, generics.ListCreateAPIView):
 		return Response(tickerCount)
 
 
-class getAllStocks(LoggingMixin, generics.ListCreateAPIView):
-	# queryset = stockData.objects.all()
-	# serializer_class = stockSerializer
-	def get(self, request, format=None):
-		try:
-		    os.remove('dataset.zip')
-		    os.remove('NSE-datasets-codes.csv')
-		except Exception as e:
-			print e
+# class getAllStocks(LoggingMixin, generics.ListCreateAPIView):
+# 	# queryset = stockData.objects.all()
+# 	# serializer_class = stockSerializer
+# 	def get(self, request, format=None):
+# 		try:
+# 		    os.remove('dataset.zip')
+# 		    os.remove('NSE-datasets-codes.csv')
+# 		except Exception as e:
+# 			print e
 
-		wget.download("https://www.quandl.com/api/v3/databases/NSE/codes?api_key=" + quandl.ApiConfig.api_key, "dataset.zip")
-		zip_ref = zipfile.ZipFile('./dataset.zip', 'r')
-		zip_ref.extractall('.')
-		zip_ref.close()
+# 		wget.download("https://www.quandl.com/api/v3/databases/NSE/codes?api_key=" + quandl.ApiConfig.api_key, "dataset.zip")
+# 		zip_ref = zipfile.ZipFile('./dataset.zip', 'r')
+# 		zip_ref.extractall('.')
+# 		zip_ref.close()
 
-		data = pd.read_csv('NSE-datasets-codes.csv', header=None)
-		data.rename(columns={0: 'Code', 1: 'Name'}, inplace=True)
-		for index, row in data.iterrows():
-		    data.set_value(index, 'Code', row.Code[4:])
+# 		data = pd.read_csv('NSE-datasets-codes.csv', header=None)
+# 		data.rename(columns={0: 'Code', 1: 'Name'}, inplace=True)
+# 		for index, row in data.iterrows():
+# 		    data.set_value(index, 'Code', row.Code[4:])
 
-		return Response(data.T.to_dict().values())
+# 		return Response(data.T.to_dict().values())
 
 
 class getStock(LoggingMixin, APIView):
@@ -139,6 +142,39 @@ class getStock(LoggingMixin, APIView):
 		return Response(data)
 
 
+class tickers(LoggingMixin, generics.ListCreateAPIView):
+	queryset = tickers.objects.all()
+	serializer_class = tickerSerializer
+
+
+class allPointers(LoggingMixin, generics.ListAPIView):
+	queryset = pointers.objects.all()
+	serializer_class = pointerSerializer
+
+	def get(self, request, format=None):
+		interestObjects = userInterests.objects.filter(user=request.user.id, interested=True)
+		interestedTickers = []
+		for interest in interestObjects:
+			interestedTickers.append(interest.ticker.Code)
+
+		interestedPointers = pointers.objects.filter(ticker__in=interestedTickers)
+		return Response(pointerSerializer(interestedPointers, many=True).data)
+
+
+class userInterestList(LoggingMixin, ListBulkCreateUpdateDestroyAPIView):
+	queryset = userInterests.objects.all()
+	serializer_class = userInterestSerializer
+
+	def get(self, request, format=None):
+		serializedData = userInterestSerializer(userInterests.objects.filter(user=request.user.id), many=True)
+		return Response(serializedData.data)
+
+
+# class userInterestDetail(LoggingMixin, generics.RetrieveUpdateDestroyAPIView):
+# 	queryset = userInterests.objects.all()
+# 	serializer_class = userInterestSerializer
+
+
 class getPointer(LoggingMixin, APIView):
 	def post(self, request, format=None):
 		multiplier = 3
@@ -168,7 +204,7 @@ class getPointer(LoggingMixin, APIView):
 			'Gap up': 0,
 			'Time Spend': 0,
 			'High': 0,
-			'Divident': 0,
+			'Dividend': 0,
 			'Earning': 0
 		}
 
@@ -308,13 +344,14 @@ class getPointer(LoggingMixin, APIView):
 		# While finding pointer 1 and 2 if the low of the excting body(open) > immidiate boring candle body high (open if it is red else close)
 		# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 		if entryFound:
-			excitingBodyLow = data.iloc[P1index].Open
+			excitingBodyOpen = data.iloc[P1index].Open
+			excitingBodyClose = data.iloc[P1index].Close
 			colorOfNextBoringCandle = data.iloc[P1index + 1].color
 			if colorOfNextBoringCandle == 'green':
-				if excitingBodyLow > data.iloc[P1index + 1].Close:
+				if excitingBodyClose > data.iloc[P1index + 1].High:
 					phase2Pointers['Gap up'] += 1
 			else:
-				if excitingBodyLow > data.iloc[P1index + 1].Open:
+				if excitingBodyOpen > data.iloc[P1index + 1].High:
 					phase2Pointers['Gap up'] += 1
 
 		# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$

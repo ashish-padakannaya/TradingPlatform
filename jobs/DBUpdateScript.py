@@ -9,6 +9,7 @@ import os
 import wget
 import zipfile
 import time
+import math
 
 print 'Connect to postgres engine'
 quandl.ApiConfig.api_key = 'GX3otZafamJ5s9zfz7nR'
@@ -41,70 +42,116 @@ print '###################################'
 
 
 def getNatureAndColor(row):
-	open = row.Open
-	close = row.Close
-	low = row.Low
-	high = row.High
+    open = row.Open
+    close = row.Close
+    low = row.Low
+    high = row.High
 
-	body_length = 0
-	stick_length = 0
-	color = 'green'
+    body_length = 0
+    stick_length = 0
+    color = 'green'
 
-	if close > open:
-		color = 'green'
-		body_length = close - open
-	if open > close:
-		color = 'red'
-		body_length = open - close
+    if close > open:
+        color = 'green'
+        body_length = close - open
+    if open > close:
+        color = 'red'
+        body_length = open - close
 
-	upper_stick_length = 0
-	lower_stick_length = 0
+    upper_stick_length = 0
+    lower_stick_length = 0
 
-	if color is 'green':
-		upper_stick_length = high - close
-		lower_stick_length = open - low
-	else:
-		upper_stick_length = high - open
-		lower_stick_length = close - low
+    if color is 'green':
+        upper_stick_length = high - close
+        lower_stick_length = open - low
+    else:
+        upper_stick_length = high - open
+        lower_stick_length = close - low
 
-	stick_length = upper_stick_length + lower_stick_length
+    stick_length = upper_stick_length + lower_stick_length
 
-	if stick_length > body_length:
-		nature = 'boring'
-	else:
-		nature = 'exciting'
+    if stick_length > body_length:
+        nature = 'boring'
+    else:
+        nature = 'exciting'
 
-	return nature, color
+    return nature, color
 
 
-def shapeData(data, ticker):
+def getIntervalLabel(row, intervalType):
+    if intervalType == 'weekly':
+        return str(row.Date.isocalendar()[0]) + '-' + str(row.Date.isocalendar()[1])
+    if intervalType == 'monthly':
+        return row.Date.strftime('%y-%m')
+    if intervalType == 'quarterly':
+        return row.Date.strftime('%y') + str(int(math.ceil(row.Date.month / 3)))
+    if intervalType == 'yearly':
+        return row.Date.strftime('%y')
+
+def shapeData(data, ticker, intervalType=None):
     data.reset_index(inplace=True)
     data.drop(['Last', 'Total Trade Quantity', 'Turnover (Lacs)'], axis=1, inplace=True)
     data.fillna(value=0, inplace=True)
+    indexOfIntervals = {}
+    orderedIntervals = []
+    if intervalType is not None:
+        for index, row in data.iterrows():
+            interval = getIntervalLabel(row, intervalType)
+            if interval not in indexOfIntervals:
+                indexOfIntervals[interval] = []
+                indexOfIntervals[interval].append(index)
+                orderedIntervals.append(interval)
+            else:
+                indexOfIntervals[interval].append(index)
+
+        listOfDicts = []
+        for intervalLabel in orderedIntervals:
+            intervalRow = {'Open': None, 'Close': None, 'High': None, 'Low': 999999999999999999999, 'Date':None}
+            for index, row in data.ix[indexOfIntervals[intervalLabel]].iterrows():
+                if index == indexOfIntervals[intervalLabel][0]:
+                    intervalRow['Open'] = row.Open
+                    intervalRow['Date'] = row.Date
+
+                if index == indexOfIntervals[intervalLabel][len(indexOfIntervals[intervalLabel]) - 1]:
+                    intervalRow['Close'] = row.Close
+
+                if row.High > intervalRow['High']:
+                    intervalRow['High'] = row.High
+
+                if row.Low < intervalRow['Low']:
+                    intervalRow['Low'] = row.Low
+            listOfDicts.append(intervalRow)
+
+        data = pd.DataFrame(listOfDicts)
 
     for index, row in data.iterrows():
         nature, color = getNatureAndColor(row)
         data.set_value(index, 'color', color)
         data.set_value(index, 'nature', nature)
+        
+        pyDateTimeObj = row.Date.to_pydatetime()
+        epoch = (pyDateTimeObj - datetime(1970, 1, 1)).total_seconds()
+        data.set_value(index, 'Date1', epoch)
+
+    del data['Date']
+    data.rename(columns={'Date1': 'Date'}, inplace=True)    
 
     data['ticker'] = ticker
     data = data.iloc[::-1]
     data.reset_index(inplace=True)
+    del data['index']
     return data
 
 
-# getting all symbols present in DB
-# connection = engine.connect()
-# resoverall = connection.execute('select * from stockapi_tickers')
-# tickers = pd.DataFrame(resoverall.fetchall())
-# tickers.columns = resoverall.keys()
-
-# all_tickers = tickers['ticker'].tolist()
+connection = engine.connect()
+resoverall = connection.execute('select * from stockapi_tickers')
+tickers = pd.DataFrame(resoverall.fetchall())
+tickers.columns = resoverall.keys()
 stock_dataframes = []
 
 
 #fetching pointers for all tickers
-for ticker in ['BHEL', 'CIPLA', 'SUNPHARMA']:
+for ticker in tickers.Code.tolist():
     dateYearAgo = (datetime.now() - timedelta(days=365)).strftime('%Y-%m-%d')
     data = quandl.get('NSE/' + ticker, start_date=dateYearAgo)
     data = shapeData(data, ticker)
@@ -294,6 +341,7 @@ for ticker in ['BHEL', 'CIPLA', 'SUNPHARMA']:
 
 
 print 'Updating Database'
+engine.execute('delete from stockapi_pointers where true')
 final_df = pd.DataFrame(stock_dataframes)
-final_df.to_sql('stockapi_pointers', engine, if_exists='replace', index=False)
+final_df.to_sql('stockapi_pointers', engine, if_exists='append', index=False)
 print 'Update Complete. Success'

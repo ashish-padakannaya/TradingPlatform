@@ -2,8 +2,8 @@
 from __future__ import unicode_literals
 import time
 from django.db import models
-natures = [('exciting', 'exciting'), ('boring', 'boring')]
-colors = [('red', 'red'), ('green', 'green')]
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
 
 
 # Create your models here.
@@ -19,12 +19,12 @@ class stockData(models.Model):
 
 
 class tickers(models.Model):
-	ticker = models.CharField(max_length=20, primary_key=True)
-	companyName = models.CharField(max_length=100, blank=False)
+	Code = models.CharField(max_length=20)
+	Name = models.CharField(max_length=100, blank=False)
 
 
 class pointers(models.Model):
-	ticker = models.CharField(max_length=20, primary_key=True)
+	ticker = models.CharField(max_length=20)
 	entry = models.FloatField()
 	stopLoss = models.FloatField()
 	target = models.FloatField()
@@ -33,4 +33,19 @@ class pointers(models.Model):
 	timeSpend = models.IntegerField(default=0)
 	high = models.IntegerField(default=0)
 	totalPoints = models.IntegerField(default=0)
-	type = models.CharField(default='daily', max_length=10)
+
+
+class userInterests(models.Model):
+	ticker = models.ForeignKey(tickers, on_delete=models.CASCADE)
+	user = models.ForeignKey(User, on_delete=models.CASCADE)
+	interested = models.BooleanField(default=False)
+
+
+# Signal to create User userInterests
+def generateInterestsForUser(sender, instance, **kwargs):
+    if kwargs['created']:
+    	for ticker in tickers.objects.all():
+    		userInterests(ticker=ticker, user=instance, interested=True).save()
+
+
+post_save.connect(generateInterestsForUser, sender=User)
