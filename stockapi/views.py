@@ -72,7 +72,8 @@ def shapeData(data, ticker, intervalType=None):
     data.fillna(value=0, inplace=True)
     indexOfIntervals = {}
     orderedIntervals = []
-    if intervalType is not None:
+    if intervalType != 'daily':
+    	print 'hqqq'
         for index, row in data.iterrows():
             interval = getIntervalLabel(row, intervalType)
             if interval not in indexOfIntervals:
@@ -161,11 +162,9 @@ class getStock(LoggingMixin, APIView):
 	def post(self, request, format=None):
 		print request.data
 		ticker = request.data['ticker']
-		intervalType = request.data['interval']
-		# start_date = datetime.strftime(datetime.now() - timedelta(days=365), '%Y-%m-%d')
-		# end_date = datetime.strftime(datetime.now(), '%Y-%m-%d')
-		start_date = None
-		end_date = None
+		interval = request.data['interval']
+		start_date = datetime.strftime(datetime.now() - timedelta(days=365), '%Y-%m-%d')
+		end_date = datetime.strftime(datetime.now(), '%Y-%m-%d')
 		if 'start_date' in request.data:
 			start_date = request.data['start_date']
 		if 'end_date' in request.data:
@@ -174,16 +173,18 @@ class getStock(LoggingMixin, APIView):
 		table_code = 'NSE/' + ticker
 
 		try:
-			if start_date is not None and end_date is not None:
-				data = quandl.get(table_code, start_date=start_date, end_date=end_date)
+			print interval
+			if interval != 'daily':
+				print 'whaaa'
+				data = quandl.get(table_code)
 			else:
-				data = quandl.get(table_code)
-			if intervalType is not 'daily':
-				data = quandl.get(table_code)
+				print 'here'
+				data = quandl.get(table_code, start_date=start_date, end_date=end_date)
 		except Exception:
 			return Response('Incorrect ticker', status=status.HTTP_400_BAD_REQUEST)
 
-		data = shapeData(data, ticker, intervalType)
+		print data
+		data = shapeData(data, ticker, interval)
 
 		data = data.T.to_dict().values()
 
