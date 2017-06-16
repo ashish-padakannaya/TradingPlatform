@@ -262,7 +262,7 @@ for ticker in tickers.Code.tolist():
     weekAverage = {}
     for index, row in data.iterrows():
         # gives week number of the year
-        week = row.Date.isocalendar()[1]
+        week = datetime.fromtimestamp(row.Date).isocalendar()[1]
 
         if week not in weekAverage:
             weekAverage[week] = []
