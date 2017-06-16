@@ -16,47 +16,13 @@ from rest_framework_tracking.models import APIRequestLog
 from rest_framework_bulk import ListBulkCreateUpdateDestroyAPIView
 import ast
 
-
+import sys
+sys.path.insert(0, '../jobs')
+import DBUpdateConfig
 import quandl
 # quandl.ApiConfig.api_key = 'VHeUNLxuAngRYDgtjD9X'
 quandl.ApiConfig.api_key = 'GX3otZafamJ5s9zfz7nR'
 
-
-def getNatureAndColor(row):
-	open = row.Open
-	close = row.Close
-	low = row.Low
-	high = row.High
-
-	body_length = 0
-	stick_length = 0
-	color = 'green'
-
-	if close > open:
-		color = 'green'
-		body_length = close - open
-	if open > close:
-		color = 'red'
-		body_length = open - close
-
-	upper_stick_length = 0
-	lower_stick_length = 0
-
-	if color is 'green':
-		upper_stick_length = high - close
-		lower_stick_length = open - low
-	else:
-		upper_stick_length = high - open
-		lower_stick_length = close - low
-
-	stick_length = upper_stick_length + lower_stick_length
-
-	if stick_length > body_length:
-		nature = 'boring'
-	else:
-		nature = 'exciting'
-
-	return nature, color
 
 
 #get popular tickers for a user
