@@ -18,29 +18,6 @@ print 'Connected'
 print '###################################'
 
 
-#fetching all ticker symbols
-# print 'Checking for symbols'
-# try:
-#     os.remove('dataset.zip')
-#     os.remove('NSE-datasets-codes.csv')
-# except Exception as e:
-#     print e
-
-# wget.download("https://www.quandl.com/api/v3/databases/NSE/codes?api_key=" + quandl.ApiConfig.api_key, "dataset.zip")
-# zip_ref = zipfile.ZipFile('./dataset.zip', 'r')
-# zip_ref.extractall('.')
-# zip_ref.close()
-
-# data = pd.read_csv('NSE-datasets-codes.csv', header=None)
-# data.rename(columns={0: 'Code', 1: 'Name'}, inplace=True)
-# for index, row in data.iterrows():
-#     data.set_value(index, 'Code', row.Code[4:])
-# data.rename(columns={'Code': 'ticker', 'Name': 'companyName'}, inplace=True)
-# data.to_sql('stockapi_tickers', engine, if_exists='replace', index=False)
-# print 'Status Clean'
-# print '###################################'
-
-
 def getNatureAndColor(row):
     open = row.Open
     close = row.Close
@@ -88,6 +65,7 @@ def getIntervalLabel(row, intervalType):
     if intervalType == 'yearly':
         return row.Date.strftime('%y')
 
+
 def shapeData(data, ticker, intervalType=None):
     data.reset_index(inplace=True)
     data.drop(['Last', 'Total Trade Quantity', 'Turnover (Lacs)'], axis=1, inplace=True)
@@ -106,7 +84,7 @@ def shapeData(data, ticker, intervalType=None):
 
         listOfDicts = []
         for intervalLabel in orderedIntervals:
-            intervalRow = {'Open': None, 'Close': None, 'High': None, 'Low': 999999999999999999999, 'Date':None}
+            intervalRow = {'Open': None, 'Close': None, 'High': None, 'Low': 999999999999999999999, 'Date': None}
             for index, row in data.ix[indexOfIntervals[intervalLabel]].iterrows():
                 if index == indexOfIntervals[intervalLabel][0]:
                     intervalRow['Open'] = row.Open
@@ -128,13 +106,13 @@ def shapeData(data, ticker, intervalType=None):
         nature, color = getNatureAndColor(row)
         data.set_value(index, 'color', color)
         data.set_value(index, 'nature', nature)
-        
+
         pyDateTimeObj = row.Date.to_pydatetime()
         epoch = (pyDateTimeObj - datetime(1970, 1, 1)).total_seconds()
         data.set_value(index, 'Date1', epoch)
 
     del data['Date']
-    data.rename(columns={'Date1': 'Date'}, inplace=True)    
+    data.rename(columns={'Date1': 'Date'}, inplace=True)
 
     data['ticker'] = ticker
     data = data.iloc[::-1]
@@ -166,7 +144,7 @@ for ticker in tickers.Code.tolist():
         'Gap up': 0,
         'Time Spend': 0,
         'High': 0,
-        'Divident': 0,
+        'Dividend': 0,
         'Earning': 0
     }
 
@@ -339,7 +317,7 @@ for ticker in tickers.Code.tolist():
             phase2Pointers['High'] += 1
 
     totalPoints = sum(phase2Pointers.values())
-    data_to_return = {'ticker': ticker, 'entry': entry, 'stopLoss': stopLoss, 'target': target, 'gapUp': phase2Pointers['Gap up'], 'trend': phase2Pointers['Trend'], 'timeSpend': phase2Pointers['Time Spend'], 'high': phase2Pointers['High'], 'totalPoints': totalPoints}
+    data_to_return = {'ticker': ticker, 'entry': entry, 'stopLoss': stopLoss, 'target': target, 'gapUp': phase2Pointers['Gap up'], 'trend': phase2Pointers['Trend'], 'timeSpend': phase2Pointers['Time Spend'], 'high': phase2Pointers['High'], 'freshness': phase2Pointers['Freshness'], 'dividend': phase2Pointers['Dividend'], 'earning': phase2Pointers['Earning'], 'totalPoints': totalPoints}
     stock_dataframes.append(data_to_return)
 
 

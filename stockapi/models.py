@@ -33,6 +33,10 @@ class pointers(models.Model):
 	timeSpend = models.IntegerField(default=0)
 	high = models.IntegerField(default=0)
 	totalPoints = models.IntegerField(default=0)
+	freshness = models.IntegerField(default=0)
+	dividend = models.IntegerField(default=0)
+	earning = models.IntegerField(default=0)
+
 
 
 class userInterests(models.Model):

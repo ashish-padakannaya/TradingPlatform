@@ -200,5 +200,3 @@ class userInterestList(LoggingMixin, ListBulkCreateUpdateDestroyAPIView):
 	def get(self, request, format=None):
 		serializedData = userInterestSerializer(userInterests.objects.filter(user=request.user.id), many=True)
 		return Response(serializedData.data)
-
-
