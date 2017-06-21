@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-import time
+# import time
 from django.db import models
-from django.contrib.auth.models import User
-from django.db.models.signals import post_save
+# from django.contrib.auth.models import User
+from django.db.models.signals import post_save, post_delete
 
 
 # Create your models here.
@@ -19,7 +19,7 @@ class stockData(models.Model):
 
 
 class tickers(models.Model):
-	Code = models.CharField(max_length=20)
+	Code = models.CharField(max_length=100)
 	Name = models.CharField(max_length=100, blank=False)
 
 
@@ -38,18 +38,15 @@ class pointers(models.Model):
 	earning = models.IntegerField(default=0)
 
 
-
 class userInterests(models.Model):
 	ticker = models.ForeignKey(tickers, on_delete=models.CASCADE)
-	user = models.ForeignKey(User, on_delete=models.CASCADE)
 	interested = models.BooleanField(default=False)
 
 
-# Signal to create User userInterests
-def generateInterestsForUser(sender, instance, **kwargs):
+# Signal to create User userInterests for any ticker added by user
+def generateInterests(sender, instance, **kwargs):
     if kwargs['created']:
-    	for ticker in tickers.objects.all():
-    		userInterests(ticker=ticker, user=instance, interested=True).save()
+    	userInterests(ticker=instance, interested=False).save()
 
 
-post_save.connect(generateInterestsForUser, sender=User)
+post_save.connect(generateInterests, sender=tickers)

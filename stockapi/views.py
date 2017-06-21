@@ -184,7 +184,7 @@ class allPointers(LoggingMixin, generics.ListAPIView):
 			return Response(pointerSerializer(pointer).data)
 		except Exception as e:
 			print e
-			interestObjects = userInterests.objects.filter(user=request.user.id, interested=True)
+			interestObjects = userInterests.objects.filter(interested=True)
 			interestedTickers = []
 			for interest in interestObjects:
 				interestedTickers.append(interest.ticker.Code)
@@ -197,6 +197,6 @@ class userInterestList(LoggingMixin, ListBulkCreateUpdateDestroyAPIView):
 	queryset = userInterests.objects.all()
 	serializer_class = userInterestSerializer
 
-	def get(self, request, format=None):
-		serializedData = userInterestSerializer(userInterests.objects.filter(user=request.user.id), many=True)
-		return Response(serializedData.data)
+	# def get(self, request, format=None):
+	# 	serializedData = userInterestSerializer(userInterests.objects.filter(user=request.user.id), many=True)
+	# 	return Response(serializedData.data)

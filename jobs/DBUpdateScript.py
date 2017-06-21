@@ -3,12 +3,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 import quandl
 import DBUpdateConfig
-import pandas as pd
 from sqlalchemy import create_engine
-import os
-import wget
-import zipfile
-import time
 import math
 
 print 'Connect to postgres engine'
@@ -127,7 +122,6 @@ tickers = pd.DataFrame(resoverall.fetchall())
 tickers.columns = resoverall.keys()
 stock_dataframes = []
 
-
 #fetching pointers for all tickers
 for ticker in tickers.Code.tolist():
     try:
@@ -157,7 +151,7 @@ for ticker in tickers.Code.tolist():
     limitReached = False
     entryIndex = 0
 
-    print len(data)
+    print 'fetching Data for ' + ticker
     while not entryFound and not limitReached and len(data) != 0:
 
         P1 = False
@@ -255,12 +249,11 @@ for ticker in tickers.Code.tolist():
         # break after finding 8th week
         if len(weekAverage.keys()) > 7:
             break
-
-    if lastWeekFound is not None:
+    # print weekAverage
+    if lastWeekFound is not None and len(weekAverage.keys()) > 7:
         del weekAverage[lastWeekFound]
-        seventhWeek = lastWeekFound + 1
-        currentWeek = seventhWeek + 6
-    if len(weekAverage.keys()) == 7:
+        seventhWeek = weekAverage.keys()[0]
+        currentWeek = weekAverage.keys()[6]
         seventhAverage = sum(weekAverage[seventhWeek]) / float(len(weekAverage[seventhWeek]))
         currentAverage = sum(weekAverage[currentWeek]) / float(len(weekAverage[currentWeek]))
 

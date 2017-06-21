@@ -36,5 +36,5 @@ class userInterestSerializer(BulkSerializerMixin, serializers.ModelSerializer):
 
     class Meta:
         model = userInterests
-        fields = ('id', 'ticker', 'user', 'interested', 'ticker_details')
+        fields = ('id', 'ticker', 'interested', 'ticker_details')
         list_serializer_class = BulkListSerializer
