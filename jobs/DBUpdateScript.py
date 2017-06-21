@@ -5,6 +5,7 @@ import quandl
 import DBUpdateConfig
 from sqlalchemy import create_engine
 import math
+from tqdm import tqdm
 
 print 'Connect to postgres engine'
 quandl.ApiConfig.api_key = 'GX3otZafamJ5s9zfz7nR'
@@ -122,8 +123,10 @@ tickers = pd.DataFrame(resoverall.fetchall())
 tickers.columns = resoverall.keys()
 stock_dataframes = []
 
+pbar = tqdm(tickers.Code.tolist())
 #fetching pointers for all tickers
-for ticker in tickers.Code.tolist():
+for ticker in pbar:
+    pbar.set_description('Processing ' + ticker)
     try:
         dateYearAgo = (datetime.now() - timedelta(days=365)).strftime('%Y-%m-%d')
         data = quandl.get('NSE/' + ticker, start_date=dateYearAgo)
@@ -151,7 +154,7 @@ for ticker in tickers.Code.tolist():
     limitReached = False
     entryIndex = 0
 
-    print 'fetching Data for ' + ticker
+    # print 'fetching Data for ' + ticker
     while not entryFound and not limitReached and len(data) != 0:
 
         P1 = False
