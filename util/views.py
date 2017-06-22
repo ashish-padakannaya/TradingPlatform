@@ -4,7 +4,8 @@ from __future__ import unicode_literals
 from django.contrib.auth.models import User
 from rest_framework import generics
 from rest_framework.response import Response
-# from util.serializers import userSerializer
+from rest_framework.views import APIView
+from util.serializers import userSerializer
 # from util.models import Profile
 
 
@@ -23,6 +24,11 @@ class checkIfEmailExists(generics.ListCreateAPIView):
 			if exceptionType == 'DoesNotExist':
 				return Response(False)
 		return Response(True)
+
+
+class userDetails(APIView):
+	def get(self, request, format=None):
+		return Response(userSerializer(User.objects.get(id=request.user.id)).data)
 
 
 # class profileList(generics.ListCreateAPIView):

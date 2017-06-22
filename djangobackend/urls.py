@@ -18,9 +18,9 @@ from rest_framework_jwt import views as jwt_views
 
 
 urlpatterns = [
+    url(r'^', include('util.urls')),
     url(r'^', include('stockapi.urls')),
     url(r'^', include('djoser.urls')),
-    url(r'^auth/login/', jwt_views.obtain_jwt_token),
-    url(r'^', include('util.urls'))
+    url(r'^auth/login/', jwt_views.obtain_jwt_token)
     # url(r'^', include('djoser.urls.authtoken'))
 ]
