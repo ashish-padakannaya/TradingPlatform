@@ -27,6 +27,16 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+BASE_CAMP = 'local'
+try:
+    if os.environ['DJANGOENV'] == 'prod':
+        BASE_CAMP = 'prod'
+    if os.environ['DJANGOENV'] == 'qa':
+        BASE_CAMP = 'qa'
+except Exception as e:
+    print 'Running locally'
+
+print BASE_CAMP
 
 # Application definition
 
@@ -88,7 +98,6 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
-        # 'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ),
@@ -96,32 +105,56 @@ REST_FRAMEWORK = {
 
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
-try:
-    if os.environ['DJANGOENV'] == 'prod':
-        print 'running PROD'
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.postgresql',
-                'NAME': 'd41hn3nmqj59mj',
-                'USER': 'cxuazrriajgxck',
-                'PASSWORD': '82148144f1b692e97575a0032adfb8da72ba7abcb4ce6fdd952117055758703a',
-                'HOST': 'ec2-54-235-119-27.compute-1.amazonaws.com',
-                'PORT': '5432',
-            }
+#PRODUCTION
+if BASE_CAMP == 'prod':
+    print 'running PROD'
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'd41hn3nmqj59mj',
+            'USER': 'cxuazrriajgxck',
+            'PASSWORD': '82148144f1b692e97575a0032adfb8da72ba7abcb4ce6fdd952117055758703a',
+            'HOST': 'ec2-54-235-119-27.compute-1.amazonaws.com',
+            'PORT': '5432',
         }
-    if os.environ['DJANGOENV'] == 'qa':
-        print 'running QA'
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.postgresql',
-                'NAME': 'd97kd12l7m174t',
-                'USER': 'kkppagovrjzfwt',
-                'PASSWORD': '705c84b75f16eb5deee3400c041f1063c0adff2ec46ac5e254de1416f781098c',
-                'HOST': 'ec2-107-21-205-25.compute-1.amazonaws.com',
-                'PORT': '5432',
-            }
+    }
+    DJOSER = {
+        'ACTIVATION_URL': '#!/activateUser/?uid={uid}&token={token}',
+        'SEND_ACTIVATION_EMAIL': True,
+        'PASSWORD_VALIDATORS': [],
+        'LOGOUT_ON_PASSWORD_CHANGE': True,
+        'SERIALIZERS': {},
+        'PASSWORD_RESET_CONFIRM_URL': '#/password-reset?uid={uid}&token={token}',
+        'SITE_NAME': 'Infinv Investments',
+        'DOMAIN': 'infinv.in'
+    }
+
+#QA
+if BASE_CAMP == 'qa':
+    print 'running QA'
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'd97kd12l7m174t',
+            'USER': 'kkppagovrjzfwt',
+            'PASSWORD': '705c84b75f16eb5deee3400c041f1063c0adff2ec46ac5e254de1416f781098c',
+            'HOST': 'ec2-107-21-205-25.compute-1.amazonaws.com',
+            'PORT': '5432',
         }
-except Exception as e:
+    }
+    DJOSER = {
+        'ACTIVATION_URL': '#!/activateUser/?uid={uid}&token={token}',
+        'SEND_ACTIVATION_EMAIL': True,
+        'PASSWORD_VALIDATORS': [],
+        'LOGOUT_ON_PASSWORD_CHANGE': True,
+        'SERIALIZERS': {},
+        'PASSWORD_RESET_CONFIRM_URL': '#/password-reset?uid={uid}&token={token}',
+        'SITE_NAME': 'Infinv Investments',
+        'DOMAIN': 'analysestock-qa.herokuapp.com'
+    }
+
+#LOCAL
+if BASE_CAMP == 'local':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -131,6 +164,16 @@ except Exception as e:
             'HOST': 'localhost',
             'PORT': '5432',
         }
+    }
+    DJOSER = {
+        'ACTIVATION_URL': '#!/activateUser/?uid={uid}&token={token}',
+        'SEND_ACTIVATION_EMAIL': True,
+        'PASSWORD_VALIDATORS': [],
+        'LOGOUT_ON_PASSWORD_CHANGE': True,
+        'SERIALIZERS': {},
+        'PASSWORD_RESET_CONFIRM_URL': '#/password-reset?uid={uid}&token={token}',
+        'SITE_NAME': 'Infinv Investments',
+        'DOMAIN': 'localhost:8000'
     }
     # removing validation checks
     # REST_FRAMEWORK = {}
@@ -159,16 +202,16 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = 'infinv.investments@gmail.com'
 EMAIL_HOST_PASSWORD = 'infinv123'
 
-DJOSER = {
-    'ACTIVATION_URL': '#!/activateUser/?uid={uid}&token={token}',
-    'SEND_ACTIVATION_EMAIL': True,
-    'PASSWORD_VALIDATORS': [],
-    'LOGOUT_ON_PASSWORD_CHANGE': True,
-    'SERIALIZERS': {},
-    'PASSWORD_RESET_CONFIRM_URL': '#/password-reset?uid={uid}&token={token}',
-    'SITE_NAME': 'Infinv Investments',
-    'DOMAIN': 'analysestock-qa.herokuapp.com'
-}
+# DJOSER = {
+#     'ACTIVATION_URL': '#!/activateUser/?uid={uid}&token={token}',
+#     'SEND_ACTIVATION_EMAIL': True,
+#     'PASSWORD_VALIDATORS': [],
+#     'LOGOUT_ON_PASSWORD_CHANGE': True,
+#     'SERIALIZERS': {},
+#     'PASSWORD_RESET_CONFIRM_URL': '#/password-reset?uid={uid}&token={token}',
+#     'SITE_NAME': 'Infinv Investments',
+#     'DOMAIN': 'analysestock-qa.herokuapp.com'
+# }
 
 JWT_AUTH = {
     'JWT_ENCODE_HANDLER':

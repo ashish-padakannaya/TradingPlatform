@@ -160,7 +160,6 @@ class getStock(LoggingMixin, APIView):
 		except Exception:
 			return Response('Incorrect ticker', status=status.HTTP_400_BAD_REQUEST)
 
-		print data
 		data = shapeData(data, ticker, interval)
 
 		data = data.T.to_dict().values()
@@ -196,7 +195,3 @@ class allPointers(LoggingMixin, generics.ListAPIView):
 class userInterestList(LoggingMixin, ListBulkCreateUpdateDestroyAPIView):
 	queryset = userInterests.objects.all()
 	serializer_class = userInterestSerializer
-
-	# def get(self, request, format=None):
-	# 	serializedData = userInterestSerializer(userInterests.objects.filter(user=request.user.id), many=True)
-	# 	return Response(serializedData.data)
