@@ -61,7 +61,7 @@ def getIntervalLabel(row, intervalType):
     if intervalType == 'monthly':
         return row.Date.strftime('%y-%m')
     if intervalType == 'quarterly':
-        return row.Date.strftime('%y') + str(int(math.ceil(row.Date.month / 3)))
+        return row.Date.strftime('%y') + str(int(math.ceil(row.Date.month / float(3))))
     if intervalType == 'yearly':
         return row.Date.strftime('%y')
 
@@ -73,7 +73,6 @@ def shapeData(data, ticker, intervalType=None):
     indexOfIntervals = {}
     orderedIntervals = []
     if intervalType != 'daily':
-    	print 'hqqq'
         for index, row in data.iterrows():
             interval = getIntervalLabel(row, intervalType)
             if interval not in indexOfIntervals:
