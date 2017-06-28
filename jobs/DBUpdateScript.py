@@ -51,52 +51,10 @@ def getNatureAndColor(row):
     return nature, color
 
 
-def getIntervalLabel(row, intervalType):
-    if intervalType == 'weekly':
-        return str(row.Date.isocalendar()[0]) + '-' + str(row.Date.isocalendar()[1])
-    if intervalType == 'monthly':
-        return row.Date.strftime('%y-%m')
-    if intervalType == 'quarterly':
-        return row.Date.strftime('%y') + str(int(math.ceil(row.Date.month / 3)))
-    if intervalType == 'yearly':
-        return row.Date.strftime('%y')
-
-
-def shapeData(data, ticker, intervalType=None):
+def shapeData(data, ticker):
     data.reset_index(inplace=True)
     data.drop(['Last', 'Total Trade Quantity', 'Turnover (Lacs)'], axis=1, inplace=True)
     data.fillna(value=0, inplace=True)
-    indexOfIntervals = {}
-    orderedIntervals = []
-    if intervalType is not None:
-        for index, row in data.iterrows():
-            interval = getIntervalLabel(row, intervalType)
-            if interval not in indexOfIntervals:
-                indexOfIntervals[interval] = []
-                indexOfIntervals[interval].append(index)
-                orderedIntervals.append(interval)
-            else:
-                indexOfIntervals[interval].append(index)
-
-        listOfDicts = []
-        for intervalLabel in orderedIntervals:
-            intervalRow = {'Open': None, 'Close': None, 'High': None, 'Low': 999999999999999999999, 'Date': None}
-            for index, row in data.ix[indexOfIntervals[intervalLabel]].iterrows():
-                if index == indexOfIntervals[intervalLabel][0]:
-                    intervalRow['Open'] = row.Open
-                    intervalRow['Date'] = row.Date
-
-                if index == indexOfIntervals[intervalLabel][len(indexOfIntervals[intervalLabel]) - 1]:
-                    intervalRow['Close'] = row.Close
-
-                if row.High > intervalRow['High']:
-                    intervalRow['High'] = row.High
-
-                if row.Low < intervalRow['Low']:
-                    intervalRow['Low'] = row.Low
-            listOfDicts.append(intervalRow)
-
-        data = pd.DataFrame(listOfDicts)
 
     for index, row in data.iterrows():
         nature, color = getNatureAndColor(row)
