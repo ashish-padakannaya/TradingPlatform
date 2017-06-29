@@ -36,6 +36,7 @@ class pointers(models.Model):
 	freshness = models.IntegerField(default=0)
 	dividend = models.IntegerField(default=0)
 	earning = models.IntegerField(default=0)
+	interval = models.CharField(max_length=20, default='daily')
 
 
 class userInterests(models.Model):
