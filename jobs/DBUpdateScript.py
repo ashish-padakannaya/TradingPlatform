@@ -6,6 +6,7 @@ import DBUpdateConfig
 from sqlalchemy import create_engine
 from tqdm import tqdm
 import math
+import sys
 
 
 def getNatureAndColor(row):
@@ -124,18 +125,25 @@ if __name__ == '__main__':
     print '###################################'
 
     connection = engine.connect()
-    resoverall = connection.execute('select * from stockapi_tickers')
-    tickers = pd.DataFrame(resoverall.fetchall())
-    tickers.columns = resoverall.keys()
+    #FOR INCREMENATAL POINTER CALCULATION
+    if len(sys.argv) > 1:
+        ticker = sys.argv[1]
+        # deleteSelective = connection.execute('delete from stockapi_tickers where ticker = \'' + ticker + '\'')
+        pbar = tqdm([ticker])
+    else:
+        resoverall = connection.execute('select * from stockapi_tickers a, stockapi_userinterests b where a.id = b.ticker_id and b.interested = true')
+        tickers = pd.DataFrame(resoverall.fetchall())
+        tickers.columns = resoverall.keys()
+        pbar = tqdm(tickers.Code.tolist())
+
     stock_dataframes = []
 
-    pbar = tqdm(tickers.Code.tolist())
     #fetching pointers for all tickers
     for ticker in pbar:
         pbar.set_description('Processing ' + ticker)
         try:
             rawData = quandl.get('NSE/' + ticker)
-        except Exception:
+        except Exception as e:
             continue
         for interval in ['daily', 'weekly', 'monthly', 'quarterly', 'yearly']:
             data = shapeData(rawData.copy(), ticker, interval)
@@ -323,7 +331,10 @@ if __name__ == '__main__':
             stock_dataframes.append(data_to_return)
 
     print 'Updating Database'
-    engine.execute('delete from stockapi_pointers where true')
+    if len(sys.argv) > 1:
+        engine.execute('delete from stockapi_pointers where ticker = \'' + ticker + '\'')
+    else:
+        engine.execute('delete from stockapi_pointers where true')
     final_df = pd.DataFrame(stock_dataframes)
     final_df.to_sql('stockapi_pointers', engine, if_exists='append', index=False)
     print 'Update Complete. Success'

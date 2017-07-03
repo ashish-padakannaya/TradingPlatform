@@ -3,7 +3,8 @@ from __future__ import unicode_literals
 # import time
 from django.db import models
 # from django.contrib.auth.models import User
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_save
+import os
 
 
 # Create your models here.
@@ -42,6 +43,19 @@ class pointers(models.Model):
 class userInterests(models.Model):
 	ticker = models.ForeignKey(tickers, on_delete=models.CASCADE)
 	interested = models.BooleanField(default=False)
+
+	__original_interest = None
+
+	def __init__(self, *args, **kwargs):
+		super(userInterests, self).__init__(*args, **kwargs)
+		self.__original_interest = self.interested
+
+	def save(self, force_insert=False, force_update=False, *args, **kwargs):
+		if self.interested != self.__original_interest and self.interested is True:
+			os.system('python jobs/DBUpdateScript.py ' + self.ticker.Code + '&')
+
+		super(userInterests, self).save(force_insert, force_update, *args, **kwargs)
+		self.__original_interest = self.interested
 
 
 # Signal to create User userInterests for any ticker added by user
