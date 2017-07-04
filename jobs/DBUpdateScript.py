@@ -131,7 +131,7 @@ if __name__ == '__main__':
         # deleteSelective = connection.execute('delete from stockapi_tickers where ticker = \'' + ticker + '\'')
         pbar = tqdm([ticker])
     else:
-        resoverall = connection.execute('select * from stockapi_tickers a, stockapi_userinterests b where a.id = b.ticker_id and b.interested = true LIMIT 10')
+        resoverall = connection.execute('select * from stockapi_tickers a, stockapi_userinterests b where a.id = b.ticker_id and b.interested = true')
         tickers = pd.DataFrame(resoverall.fetchall())
         tickers.columns = resoverall.keys()
         pbar = tqdm(tickers.Code.tolist())
