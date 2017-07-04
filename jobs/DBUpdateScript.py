@@ -131,7 +131,7 @@ if __name__ == '__main__':
         # deleteSelective = connection.execute('delete from stockapi_tickers where ticker = \'' + ticker + '\'')
         pbar = tqdm([ticker])
     else:
-        resoverall = connection.execute('select * from stockapi_tickers a, stockapi_userinterests b where a.id = b.ticker_id and b.interested = true')
+        resoverall = connection.execute('select * from stockapi_tickers a, stockapi_userinterests b where a.id = b.ticker_id and b.interested = true LIMIT 10')
         tickers = pd.DataFrame(resoverall.fetchall())
         tickers.columns = resoverall.keys()
         pbar = tqdm(tickers.Code.tolist())
@@ -327,8 +327,7 @@ if __name__ == '__main__':
                         phase2Pointers['High'] += 1
 
             totalPoints = sum(phase2Pointers.values())
-            data_to_return = {'ticker': ticker, 'entry': entry, 'stopLoss': stopLoss, 'target': target, 'gapUp': phase2Pointers['Gap up'], 'trend': phase2Pointers['Trend'], 'timeSpend': phase2Pointers['Time Spend'], 'high': phase2Pointers['High'], 'freshness': phase2Pointers['Freshness'], 'dividend': phase2Pointers['Dividend'], 'earning': phase2Pointers['Earning'], 'totalPoints': totalPoints, 'interval': interval}
-            stock_dataframes.append(data_to_return)
+            stock_dataframes.append({'ticker': ticker, 'entry': entry, 'stopLoss': stopLoss, 'target': target, 'gapUp': phase2Pointers['Gap up'], 'trend': phase2Pointers['Trend'], 'timeSpend': phase2Pointers['Time Spend'], 'high': phase2Pointers['High'], 'freshness': phase2Pointers['Freshness'], 'dividend': phase2Pointers['Dividend'], 'earning': phase2Pointers['Earning'], 'totalPoints': totalPoints, 'interval': interval})
 
     print 'Updating Database'
     if len(sys.argv) > 1:
