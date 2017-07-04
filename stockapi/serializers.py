@@ -18,7 +18,7 @@ class tickerSerializer(serializers.ModelSerializer):
 class pointerSerializer(serializers.ModelSerializer):
     class Meta:
         model = pointers
-        fields = ('id', 'ticker', 'entry', 'stopLoss', 'target', 'gapUp', 'trend', 'high', 'timeSpend', 'freshness', 'dividend', 'earning', 'totalPoints',)
+        fields = ('id', 'ticker', 'entry', 'stopLoss', 'target', 'gapUp', 'trend', 'high', 'timeSpend', 'freshness', 'dividend', 'earning', 'totalPoints', 'interval')
 
 
 # class userInterestSerializer(serializers.ModelSerializer):

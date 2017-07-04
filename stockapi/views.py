@@ -177,9 +177,10 @@ class allPointers(LoggingMixin, generics.ListAPIView):
 
 	def get(self, request, format=None):
 		try:
-			ticker = request.GET['ticker']
-			pointer = pointers.objects.get(ticker=ticker)
-			return Response(pointerSerializer(pointer).data)
+		    ticker = request.GET['ticker']
+		    interval = request.GET['interval']
+		    pointer = pointers.objects.get(ticker=ticker, interval=interval)
+		    return Response(pointerSerializer(pointer).data)
 		except Exception as e:
 			print e
 			interestObjects = userInterests.objects.filter(interested=True)
