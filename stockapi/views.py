@@ -14,6 +14,7 @@ import ast
 import quandl
 import math
 import pandas as pd
+import os
 # quandl.ApiConfig.api_key = 'VHeUNLxuAngRYDgtjD9X'
 quandl.ApiConfig.api_key = 'GX3otZafamJ5s9zfz7nR'
 
@@ -176,9 +177,13 @@ class allPointers(LoggingMixin, generics.ListAPIView):
 	serializer_class = pointerSerializer
 
 	def get(self, request, format=None):
+		if 'interval' not in request.GET:
+			return Response('Please pass interval in query parameter', status=status.HTTP_400_BAD_REQUEST)
+		interval = request.GET['interval']
 		try:
 		    ticker = request.GET['ticker']
-		    interval = request.GET['interval']
+		    if not pointers.objects.filter(ticker=ticker, interval=interval).exists():
+		    	os.system('python jobs/DBUpdateScript.py ' + ticker)
 		    pointer = pointers.objects.get(ticker=ticker, interval=interval)
 		    return Response(pointerSerializer(pointer).data)
 		except Exception as e:
@@ -188,7 +193,7 @@ class allPointers(LoggingMixin, generics.ListAPIView):
 			for interest in interestObjects:
 				interestedTickers.append(interest.ticker.Code)
 
-			interestedPointers = pointers.objects.filter(ticker__in=interestedTickers)
+			interestedPointers = pointers.objects.filter(ticker__in=interestedTickers, interval=interval)
 			return Response(pointerSerializer(interestedPointers, many=True).data)
 
 
