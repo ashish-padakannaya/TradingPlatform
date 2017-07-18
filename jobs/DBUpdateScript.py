@@ -245,7 +245,7 @@ if __name__ == '__main__':
                 stopLoss = 0
                 target = 0
 
-            if interval == 'daily':
+            if interval == 'daily' and entryFound:
                 # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
                 # Finding pointer 2
                 # if 7th week avg<= current week avg then 1
@@ -280,22 +280,20 @@ if __name__ == '__main__':
                 # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
                 # Pointer 3 should be green
                 # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-                if entryFound:
-                    if data.iloc[P3index].color == 'green':
-                        phase2Pointers['Gap up'] += 1
+                if data.iloc[P3index].color == 'green':
+                    phase2Pointers['Gap up'] += 1
 
                 # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
                 # While finding pointer 1 and 2 if the low of the excting body(open) > immidiate boring candle body high (open if it is red else close)
                 # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-                if entryFound:
-                    excitingBodyLow = data.iloc[P1index].Open
-                    colorOfNextBoringCandle = data.iloc[P1index + 1].color
-                    if colorOfNextBoringCandle == 'green':
-                        if excitingBodyLow > data.iloc[P1index + 1].Close:
-                            phase2Pointers['Gap up'] += 1
-                    else:
-                        if excitingBodyLow > data.iloc[P1index + 1].Open:
-                            phase2Pointers['Gap up'] += 1
+                excitingBodyLow = data.iloc[P1index].Open
+                colorOfNextBoringCandle = data.iloc[P1index + 1].color
+                if colorOfNextBoringCandle == 'green':
+                    if excitingBodyLow > data.iloc[P1index + 1].Close:
+                        phase2Pointers['Gap up'] += 1
+                else:
+                    if excitingBodyLow > data.iloc[P1index + 1].Open:
+                        phase2Pointers['Gap up'] += 1
 
                 # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
                 # number of boring candles between green excing and exciting pointer 2 and 3
@@ -303,12 +301,11 @@ if __name__ == '__main__':
                 # >3 and <=6 then 1 points
                 # otherwise 0
                 # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-                if entryFound:
-                    boringCandleCount = P3index - P1index - 1
-                    if boringCandleCount <= 3:
-                        phase2Pointers['Time Spend'] += 2
-                    if 3 < boringCandleCount <= 6:
-                        phase2Pointers['Time Spend'] += 1
+                boringCandleCount = P3index - P1index - 1
+                if boringCandleCount <= 3:
+                    phase2Pointers['Time Spend'] += 2
+                if 3 < boringCandleCount <= 6:
+                    phase2Pointers['Time Spend'] += 1
 
                 # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
                 # Find the high before the entry
@@ -316,15 +313,14 @@ if __name__ == '__main__':
                 # Entry + (Entry-stop loss)*4 >=High -> 1 points
                 # otherwise 0
                 # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-                if entryFound:
-                    high = 0
-                    for index, row in data[:entryIndex].iterrows():
-                        if row.High > high:
-                            high = row.High
-                    if (entry + (entry - stopLoss) * 6) >= high:
-                        phase2Pointers['High'] += 2
-                    elif (entry + (entry - stopLoss) * 4) >= high:
-                        phase2Pointers['High'] += 1
+                high = 0
+                for index, row in data[:entryIndex].iterrows():
+                    if row.High > high:
+                        high = row.High
+                if (entry + (entry - stopLoss) * 6) >= high:
+                    phase2Pointers['High'] += 2
+                elif (entry + (entry - stopLoss) * 4) >= high:
+                    phase2Pointers['High'] += 1
 
             totalPoints = sum(phase2Pointers.values())
             stock_dataframes.append({'ticker': ticker, 'entry': entry, 'stopLoss': stopLoss, 'target': target, 'gapUp': phase2Pointers['Gap up'], 'trend': phase2Pointers['Trend'], 'timeSpend': phase2Pointers['Time Spend'], 'high': phase2Pointers['High'], 'freshness': phase2Pointers['Freshness'], 'dividend': phase2Pointers['Dividend'], 'earning': phase2Pointers['Earning'], 'totalPoints': totalPoints, 'interval': interval})
