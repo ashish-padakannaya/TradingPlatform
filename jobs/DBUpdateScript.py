@@ -317,9 +317,9 @@ if __name__ == '__main__':
                 for index, row in data[:entryIndex].iterrows():
                     if row.High > high:
                         high = row.High
-                if (entry + (entry - stopLoss) * 6) >= high:
+                if (entry + (entry - stopLoss) * 6) <= high:
                     phase2Pointers['High'] += 2
-                elif (entry + (entry - stopLoss) * 4) >= high:
+                elif (entry + (entry - stopLoss) * 4) <= high:
                     phase2Pointers['High'] += 1
 
             totalPoints = sum(phase2Pointers.values())
