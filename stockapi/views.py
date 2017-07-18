@@ -18,7 +18,7 @@ import sys
 sys.path.append(os.path.abspath('./jobs'))
 print sys.path
 
-from DBUpdateScript import getNatureAndColor, getIntervalLabel, shapeData
+from DBUpdateScript import shapeData
 
 # quandl.ApiConfig.api_key = 'VHeUNLxuAngRYDgtjD9X'
 quandl.ApiConfig.api_key = 'GX3otZafamJ5s9zfz7nR'
