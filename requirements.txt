@@ -11,6 +11,7 @@ djangorestframework-jwt==1.10.0
 djoser==0.5.4
 drf-tracking==1.2.0
 enum34==1.1.6
+googlefinance==0.7
 idna==2.5
 inflection==0.3.1
 ipaddress==1.0.18

@@ -14,6 +14,7 @@ import ast
 import quandl
 import os
 import sys
+import googlefinance
 
 sys.path.append(os.path.abspath('./jobs'))
 print sys.path
@@ -67,6 +68,19 @@ class getStock(LoggingMixin, APIView):
 		data = data.T.to_dict().values()
 
 		return Response(data)
+
+
+class getCurrentPrice(LoggingMixin, APIView):
+	def get(self, request, format=None):
+		if 'ticker' not in request.GET:
+			return Response('Please supply ticker', status=status.HTTP_400_BAD_REQUEST)
+		try:
+			quote = googlefinance.getQuotes(str(request.GET['ticker']))
+			price = float(quote[0]['LastTradePrice'])
+			return Response(price)
+
+		except Exception:
+			return Response(request.GET['ticker'] + 'is currently not in trade', status=status.HTTP_400_BAD_REQUEST)
 
 
 class tickers(LoggingMixin, generics.ListCreateAPIView):
