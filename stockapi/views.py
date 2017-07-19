@@ -72,15 +72,35 @@ class getStock(LoggingMixin, APIView):
 
 class getCurrentPrice(LoggingMixin, APIView):
 	def get(self, request, format=None):
-		if 'ticker' not in request.GET:
-			return Response('Please supply ticker', status=status.HTTP_400_BAD_REQUEST)
-		try:
-			quote = googlefinance.getQuotes(str(request.GET['ticker']))
-			price = float(quote[0]['LastTradePrice'])
-			return Response(price)
+		interestObjects = userInterests.objects.filter(interested=True)
+		interestedTickers = []
+		for interest in interestObjects:
+			interestedTickers.append(interest.ticker.Code)
 
-		except Exception:
-			return Response(request.GET['ticker'] + 'is currently not in trade', status=status.HTTP_400_BAD_REQUEST)
+		# Google finance can only handle 950 tickers at once, if favourite ticker count exceeds this, it has to be spliced and queried
+		tickerSpliceStart = 0
+		tickerSpliceEnd = 949
+		allTickersDone = False
+
+		currentPrice = {}
+		for ticker in interestedTickers:
+			currentPrice[ticker] = None
+
+		while not allTickersDone:
+			quoteList = googlefinance.getQuotes(interestedTickers[tickerSpliceStart:tickerSpliceEnd])
+			for quote in quoteList:
+				ticker = str(quote['StockSymbol'])
+				# removing commas from price retrieved
+				price = float(quote['LastTradePrice'].replace(',', ''))
+				currentPrice[ticker] = price
+
+			tickerSpliceStart = tickerSpliceEnd
+			tickerSpliceEnd = tickerSpliceEnd + 949
+
+			if tickerSpliceStart > len(interestedTickers):
+				allTickersDone = True
+
+		return Response(currentPrice)
 
 
 class tickers(LoggingMixin, generics.ListCreateAPIView):
