@@ -217,28 +217,28 @@ if __name__ == '__main__':
                                 entry = float(entryAtIndex)
                                 entryIndex = index
                     #finding lowest low
-                    for index, row in data[:entryIndex].iterrows():
-                        if lowAfterEntry is None or row.Low < float(lowAfterEntry):
-                            lowAfterEntry = float(row.Low)
+                    # for index, row in data[:entryIndex].iterrows():
+                    #     if lowAfterEntry is None or row.Low < float(lowAfterEntry):
+                    #         lowAfterEntry = float(row.Low)
 
-                    if entry > lowAfterEntry:
-                        startPoint = entryIndex
-                    else:
-                        entryFound = True
-                        stopLoss = None
-                        stopLossAtIndex = 0
-                        #stopLossIndex = 0
-                        for index, row in data[P1index:P3index].iterrows():
-                            # if (row.color == 'green' and row.nature == 'exciting') or (row.nature == 'boring'):
-                            stopLossAtIndex = row.Low
-                            if stopLoss is None or stopLossAtIndex < stopLoss:
-                                stopLoss = float(stopLossAtIndex)
-                            # print stopLoss
-                        target = ((entry - stopLoss) * multiplier) + entry
-                        entry = round(entry, 2)
-                        target = round(target, 2)
-                        stopLoss = round(stopLoss, 2)
-                        phase2Pointers['Freshness'] = 1
+                    # if entry > lowAfterEntry:
+                    #     startPoint = entryIndex
+                    # else:
+                    entryFound = True
+                    stopLoss = None
+                    stopLossAtIndex = 0
+                    #stopLossIndex = 0
+                    for index, row in data[P1index:P3index].iterrows():
+                        # if (row.color == 'green' and row.nature == 'exciting') or (row.nature == 'boring'):
+                        stopLossAtIndex = row.Low
+                        if stopLoss is None or stopLossAtIndex < stopLoss:
+                            stopLoss = float(stopLossAtIndex)
+                        # print stopLoss
+                    target = ((entry - stopLoss) * multiplier) + entry
+                    entry = round(entry, 2)
+                    target = round(target, 2)
+                    stopLoss = round(stopLoss, 2)
+                    phase2Pointers['Freshness'] = 1
 
             if not entryFound:
                 entry = 0
