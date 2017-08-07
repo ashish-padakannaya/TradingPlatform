@@ -178,6 +178,7 @@ if __name__ == '__main__':
                 P3index = None
 
                 for index, row in data[startPoint:].iterrows():
+                    # print row
                     if index == len(data) - 1:
                         limitReached = True
 
@@ -191,6 +192,10 @@ if __name__ == '__main__':
                         if row.nature == 'boring' and index == (P1index + 1):
                             P2 = True
                             P2index = index
+                            continue
+                        elif row.color == 'green' and row.nature == 'exciting':
+                            P1 = True
+                            P1index = index
                             continue
                         else:
                             P1 = False
@@ -210,6 +215,7 @@ if __name__ == '__main__':
                     entry = 0
                     entryAtIndex = 0
                     for index, row in data[P2index:P3index].iterrows():
+                        print row
                         if row.nature == 'boring':
                             # entry_at_index = row.High
                             entryAtIndex = max(row.Open, row.Close)
@@ -217,28 +223,28 @@ if __name__ == '__main__':
                                 entry = float(entryAtIndex)
                                 entryIndex = index
                     #finding lowest low
-                    # for index, row in data[:entryIndex].iterrows():
-                    #     if lowAfterEntry is None or row.Low < float(lowAfterEntry):
-                    #         lowAfterEntry = float(row.Low)
+                    for index, row in data[:entryIndex].iterrows():
+                        if lowAfterEntry is None or row.Low < float(lowAfterEntry):
+                            lowAfterEntry = float(row.Low)
 
-                    # if entry > lowAfterEntry:
-                    #     startPoint = entryIndex
-                    # else:
-                    entryFound = True
-                    stopLoss = None
-                    stopLossAtIndex = 0
-                    #stopLossIndex = 0
-                    for index, row in data[P1index:P3index].iterrows():
-                        # if (row.color == 'green' and row.nature == 'exciting') or (row.nature == 'boring'):
-                        stopLossAtIndex = row.Low
-                        if stopLoss is None or stopLossAtIndex < stopLoss:
-                            stopLoss = float(stopLossAtIndex)
-                        # print stopLoss
-                    target = ((entry - stopLoss) * multiplier) + entry
-                    entry = round(entry, 2)
-                    target = round(target, 2)
-                    stopLoss = round(stopLoss, 2)
-                    phase2Pointers['Freshness'] = 1
+                    if entry > lowAfterEntry:
+                        startPoint = entryIndex
+                    else:
+                        entryFound = True
+                        stopLoss = None
+                        stopLossAtIndex = 0
+                        #stopLossIndex = 0
+                        for index, row in data[P1index:P3index].iterrows():
+                            # if (row.color == 'green' and row.nature == 'exciting') or (row.nature == 'boring'):
+                            stopLossAtIndex = row.Low
+                            if stopLoss is None or stopLossAtIndex < stopLoss:
+                                stopLoss = float(stopLossAtIndex)
+                            # print stopLoss
+                        target = ((entry - stopLoss) * multiplier) + entry
+                        entry = round(entry, 2)
+                        target = round(target, 2)
+                        stopLoss = round(stopLoss, 2)
+                        phase2Pointers['Freshness'] = 1
 
             if not entryFound:
                 entry = 0
