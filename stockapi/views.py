@@ -79,15 +79,18 @@ class getCurrentPrice(LoggingMixin, APIView):
 
 		# Google finance can only handle 950 tickers at once, if favourite ticker count exceeds this, it has to be spliced and queried
 		tickerSpliceStart = 0
-		tickerSpliceEnd = 949
+		tickerSpliceEnd = 95
 		allTickersDone = False
 
 		currentPrice = {}
 		for ticker in interestedTickers:
 			currentPrice[ticker] = None
 
+		print interestedTickers
 		while not allTickersDone:
 			quoteList = googlefinance.getQuotes(interestedTickers[tickerSpliceStart:tickerSpliceEnd])
+			print len(quoteList)
+			# print quoteList
 			for quote in quoteList:
 				ticker = str(quote['StockSymbol'])
 				# removing commas from price retrieved
@@ -95,7 +98,7 @@ class getCurrentPrice(LoggingMixin, APIView):
 				currentPrice[ticker] = price
 
 			tickerSpliceStart = tickerSpliceEnd
-			tickerSpliceEnd = tickerSpliceEnd + 949
+			tickerSpliceEnd = tickerSpliceEnd + 95
 
 			if tickerSpliceStart > len(interestedTickers):
 				allTickersDone = True
