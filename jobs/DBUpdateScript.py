@@ -218,8 +218,8 @@ if __name__ == '__main__':
                                 entryIndex = index
                     #finding lowest low
                     for index, row in data[:entryIndex].iterrows():
-                        if lowAfterEntry is None or row.Low < lowAfterEntry:
-                            lowAfterEntry = row.Low
+                        if lowAfterEntry is None or row.Low < float(lowAfterEntry):
+                            lowAfterEntry = float(row.Low)
 
                     if entry > lowAfterEntry:
                         startPoint = entryIndex
