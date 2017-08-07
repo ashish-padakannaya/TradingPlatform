@@ -215,7 +215,6 @@ if __name__ == '__main__':
                     entry = 0
                     entryAtIndex = 0
                     for index, row in data[P2index:P3index].iterrows():
-                        print row
                         if row.nature == 'boring':
                             # entry_at_index = row.High
                             entryAtIndex = max(row.Open, row.Close)
