@@ -86,8 +86,10 @@ class getCurrentPrice(LoggingMixin, APIView):
 		for ticker in interestedTickers:
 			currentPrice[ticker] = None
 
+		print interestedTickers
 		while not allTickersDone:
 			quoteList = googlefinance.getQuotes(interestedTickers[tickerSpliceStart:tickerSpliceEnd])
+			print quoteList
 			# print quoteList
 			for quote in quoteList:
 				ticker = str(quote['StockSymbol'])
