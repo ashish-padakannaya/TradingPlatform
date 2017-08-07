@@ -19,7 +19,7 @@ def getNatureAndColor(row):
     stick_length = 0
     color = 'green'
 
-    if close > open:
+    if close >= open:
         color = 'green'
         body_length = close - open
     if open > close:
@@ -38,7 +38,7 @@ def getNatureAndColor(row):
 
     stick_length = upper_stick_length + lower_stick_length
 
-    if stick_length > body_length:
+    if stick_length >= body_length:
         nature = 'boring'
     else:
         nature = 'exciting'
