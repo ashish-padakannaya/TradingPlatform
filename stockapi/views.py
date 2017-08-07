@@ -79,7 +79,7 @@ class getCurrentPrice(LoggingMixin, APIView):
 
 		# Google finance can only handle 950 tickers at once, if favourite ticker count exceeds this, it has to be spliced and queried
 		tickerSpliceStart = 0
-		tickerSpliceEnd = 95
+		tickerSpliceEnd = 90
 		allTickersDone = False
 
 		currentPrice = {}
@@ -97,7 +97,7 @@ class getCurrentPrice(LoggingMixin, APIView):
 				currentPrice[ticker] = price
 
 			tickerSpliceStart = tickerSpliceEnd
-			tickerSpliceEnd = tickerSpliceEnd + 95
+			tickerSpliceEnd = tickerSpliceEnd + 90
 
 			if tickerSpliceStart > len(interestedTickers):
 				allTickersDone = True
