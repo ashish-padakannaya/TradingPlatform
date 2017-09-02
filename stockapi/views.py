@@ -6,6 +6,7 @@ from stockapi.models import userInterests, tickers, pointers
 from stockapi.serializers import userInterestSerializer, tickerSerializer, pointerSerializer
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from util.views import chunks
 from datetime import datetime, timedelta
 from rest_framework_tracking.mixins import LoggingMixin
 from rest_framework_tracking.models import APIRequestLog
@@ -14,10 +15,12 @@ import ast
 import quandl
 import os
 import sys
-import googlefinance
+# import googlefinance
+import requests
+import json
+
 
 sys.path.append(os.path.abspath('./jobs'))
-print sys.path
 
 from DBUpdateScript import shapeData
 
@@ -70,6 +73,38 @@ class getStock(LoggingMixin, APIView):
 		return Response(data)
 
 
+# class getCurrentPrice(LoggingMixin, APIView):
+# 	def get(self, request, format=None):
+# 		interestObjects = userInterests.objects.filter(interested=True)
+# 		interestedTickers = []
+# 		for interest in interestObjects:
+# 			interestedTickers.append(interest.ticker.Code)
+
+# 		# Google finance can only handle 950 tickers at once, if favourite ticker count exceeds this, it has to be spliced and queried
+# 		tickerSpliceStart = 0
+# 		tickerSpliceEnd = 90
+# 		allTickersDone = False
+
+# 		currentPrice = {}
+# 		for ticker in interestedTickers:
+# 			currentPrice[ticker] = None
+
+# 		while not allTickersDone:
+# 			quoteList = googlefinance.getQuotes(interestedTickers[tickerSpliceStart:tickerSpliceEnd])
+# 			for quote in quoteList:
+# 				ticker = str(quote['StockSymbol'])
+# 				price = float(quote['LastTradePrice'].replace(',', ''))
+# 				currentPrice[ticker] = price
+
+# 			tickerSpliceStart = tickerSpliceEnd
+# 			tickerSpliceEnd = tickerSpliceEnd + 90
+
+# 			if tickerSpliceStart > len(interestedTickers):
+# 				allTickersDone = True
+
+# 		return Response(currentPrice)
+
+
 class getCurrentPrice(LoggingMixin, APIView):
 	def get(self, request, format=None):
 		interestObjects = userInterests.objects.filter(interested=True)
@@ -77,31 +112,16 @@ class getCurrentPrice(LoggingMixin, APIView):
 		for interest in interestObjects:
 			interestedTickers.append(interest.ticker.Code)
 
-		# Google finance can only handle 950 tickers at once, if favourite ticker count exceeds this, it has to be spliced and queried
-		tickerSpliceStart = 0
-		tickerSpliceEnd = 90
-		allTickersDone = False
-
 		currentPrice = {}
 		for ticker in interestedTickers:
 			currentPrice[ticker] = None
 
-		print interestedTickers
-		while not allTickersDone:
-			quoteList = googlefinance.getQuotes(interestedTickers[tickerSpliceStart:tickerSpliceEnd])
-			print quoteList
-			# print quoteList
-			for quote in quoteList:
-				ticker = str(quote['StockSymbol'])
-				# removing commas from price retrieved
-				price = float(quote['LastTradePrice'].replace(',', ''))
-				currentPrice[ticker] = price
-
-			tickerSpliceStart = tickerSpliceEnd
-			tickerSpliceEnd = tickerSpliceEnd + 90
-
-			if tickerSpliceStart > len(interestedTickers):
-				allTickersDone = True
+		for tickers in list(chunks(interestedTickers,90)):
+			allTickerData = requests.get('http://finance.google.com/finance/info?client=ig&q=' + ','.join(tickers))
+			allTickerData = json.loads(allTickerData.content.replace('\n', '').replace('//', ''))
+			
+			for tickerData in allTickerData:
+				currentPrice[tickerData['t']] = float(tickerData['l'].replace(',',''))
 
 		return Response(currentPrice)
 

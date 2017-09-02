@@ -11,11 +11,13 @@ djangorestframework-jwt==1.10.0
 djoser==0.5.4
 drf-tracking==1.2.0
 enum34==1.1.6
-googlefinance==0.7
+html5lib==0.999999999
 idna==2.5
 inflection==0.3.1
 ipaddress==1.0.18
+kiteconnect==3.6.0
 Markdown==2.6.8
+mechanize==0.3.5
 more-itertools==3.0.0
 ndg-httpsclient==0.4.2
 numpy==1.12.1
@@ -35,5 +37,7 @@ requests==2.13.0
 six==1.10.0
 SQLAlchemy==1.1.10
 tqdm==4.14.0
+webencodings==0.5.1
+websocket-client==0.44.0
 wget==3.2
 whitenoise==3.3.0

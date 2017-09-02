@@ -8,6 +8,9 @@ from rest_framework.views import APIView
 from util.serializers import userSerializer
 # from util.models import Profile
 
+def chunks(l, n):
+    for i in range(0, len(l), n):
+        yield l[i:i + n]
 
 # Create your views here.
 class checkIfEmailExists(generics.ListCreateAPIView):
@@ -29,6 +32,8 @@ class checkIfEmailExists(generics.ListCreateAPIView):
 class userDetails(APIView):
 	def get(self, request, format=None):
 		return Response(userSerializer(User.objects.get(id=request.user.id)).data)
+
+
 
 
 # class profileList(generics.ListCreateAPIView):
