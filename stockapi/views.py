@@ -119,6 +119,7 @@ class getCurrentPrice(LoggingMixin, APIView):
 		for tickers in list(chunks(interestedTickers,90)):
 			allTickerData = requests.get('http://finance.google.com/finance/info?client=ig&q=' + ','.join(tickers))
 			allTickerData = json.loads(allTickerData.content.replace('\n', '').replace('//', ''))
+			print allTickerData
 			
 			for tickerData in allTickerData:
 				currentPrice[tickerData['t']] = float(tickerData['l'].replace(',',''))
