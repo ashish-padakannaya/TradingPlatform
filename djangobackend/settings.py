@@ -113,10 +113,10 @@ if BASE_CAMP == 'prod':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'd41hn3nmqj59mj',
-            'USER': 'cxuazrriajgxck',
-            'PASSWORD': '82148144f1b692e97575a0032adfb8da72ba7abcb4ce6fdd952117055758703a',
-            'HOST': 'ec2-54-235-119-27.compute-1.amazonaws.com',
+            'NAME': 'd9aigals9rapf5',
+            'USER': 'lzxjlsyjaxpyyj',
+            'PASSWORD': '19c915a470a3c43c8dde4e398d787ecb770a9bbd43ebffc5e18741accf178ad5',
+            'HOST': 'ec2-184-72-255-211.compute-1.amazonaws.com',
             'PORT': '5432',
         }
     }
