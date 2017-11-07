@@ -1,108 +1,54 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
 from rest_framework import generics, status
-#from stockapi.models import stockData
+from stockapi.models import userInterests, tickers, pointers
+from stockapi.serializers import userInterestSerializer, tickerSerializer, pointerSerializer
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from util.views import chunks
 from datetime import datetime, timedelta
-import pandas as pd
-import zipfile
-import wget
-import os
-
-
+from rest_framework_tracking.mixins import LoggingMixin
+from rest_framework_tracking.models import APIRequestLog
+from rest_framework_bulk import ListBulkCreateUpdateDestroyAPIView
+import ast
 import quandl
+import os
+import sys
+# import googlefinance
+import requests
+import json
+
+
+sys.path.append(os.path.abspath('./jobs'))
+
+from DBUpdateScript import shapeData
+
 # quandl.ApiConfig.api_key = 'VHeUNLxuAngRYDgtjD9X'
 quandl.ApiConfig.api_key = 'GX3otZafamJ5s9zfz7nR'
 
 
-def getNatureAndColor(row):
-	open = row.Open
-	close = row.Close
-	low = row.Low
-	high = row.High
-
-	body_length = 0
-	stick_length = 0
-	color = 'green'
-
-	if close > open:
-		color = 'green'
-		body_length = close - open
-	if open > close:
-		color = 'red'
-		body_length = open - close
-
-	upper_stick_length = 0
-	lower_stick_length = 0
-
-	if color is 'green':
-		upper_stick_length = high - close
-		lower_stick_length = open - low
-	else:
-		upper_stick_length = high - open
-		lower_stick_length = close - low
-
-	stick_length = upper_stick_length + lower_stick_length
-
-	if stick_length > body_length:
-		nature = 'boring'
-	else:
-		nature = 'exciting'
-
-	return nature, color
-
-
-#create User programmatically
-class createUser(generics.ListCreateAPIView):
-	authentication_classes = []
-	permission_classes = []
-
-	def post(self, request, format=None):
-		try:
-			username = str(request.data['username'])
-			email = str(request.data['email'])
-			password = str(request.data['password'])
-			user = User.objects.create_user(username, email, password)
-		except Exception as e:
-			return Response(e.message, status=status.HTTP_400_BAD_REQUEST)
-		user.save()
-
-		return Response('success')
-
-
-class getAllStocks(generics.ListCreateAPIView):
-	# queryset = stockData.objects.all()
-	# serializer_class = stockSerializer
+#get popular tickers for a user
+class getPopularTickers(LoggingMixin, generics.ListCreateAPIView):
 	def get(self, request, format=None):
-		try:
-		    os.remove('dataset.zip')
-		    os.remove('NSE-datasets-codes.csv')
-		except Exception as e:
-			print e
-
-		wget.download("https://www.quandl.com/api/v3/databases/NSE/codes?api_key=" + quandl.ApiConfig.api_key, "dataset.zip")
-		zip_ref = zipfile.ZipFile('./dataset.zip', 'r')
-		zip_ref.extractall('.')
-		zip_ref.close()
-
-		data = pd.read_csv('NSE-datasets-codes.csv', header=None)
-		data.rename(columns={0: 'Code', 1: 'Name'}, inplace=True)
-		for index, row in data.iterrows():
-		    data.set_value(index, 'Code', row.Code[4:])
-
-		return Response(data.T.to_dict().values())
+		history = APIRequestLog.objects.all().filter(user=request.user.id, path='/pointers/', status_code=200)
+		tickerCount = {}
+		for item in history:
+			ticker = ast.literal_eval(item.__dict__['data'])['ticker']
+			if ticker not in tickerCount:
+				tickerCount[ticker] = 1
+			else:
+				tickerCount[ticker] += 1
+		return Response(tickerCount)
 
 
-class getStock(APIView):
+class getStock(LoggingMixin, APIView):
 	def post(self, request, format=None):
 		print request.data
 		ticker = request.data['ticker']
-		# start_date = datetime.strftime(datetime.now() - timedelta(days=365), '%Y-%m-%d')
-		# end_date = datetime.strftime(datetime.now(), '%Y-%m-%d')
-		start_date = None
-		end_date = None
+		interval = request.data['interval']
+		start_date = datetime.strftime(datetime.now() - timedelta(days=365), '%Y-%m-%d')
+		end_date = datetime.strftime(datetime.now(), '%Y-%m-%d')
 		if 'start_date' in request.data:
 			start_date = request.data['start_date']
 		if 'end_date' in request.data:
@@ -111,128 +57,107 @@ class getStock(APIView):
 		table_code = 'NSE/' + ticker
 
 		try:
-			if start_date is not None and end_date is not None:
-				data = quandl.get(table_code, start_date=start_date, end_date=end_date)
-			else:
+			print interval
+			if interval != 'daily':
+				print 'whaaa'
 				data = quandl.get(table_code)
+			else:
+				data = quandl.get(table_code, start_date=start_date, end_date=end_date)
 		except Exception:
 			return Response('Incorrect ticker', status=status.HTTP_400_BAD_REQUEST)
 
-		data.reset_index(inplace=True)
-		data.drop(['Last', 'Total Trade Quantity', 'Turnover (Lacs)'], axis=1, inplace=True)
-		data.fillna(value=0, inplace=True)
-
-		# setting nature and color of the stock data
-		for index, row in data.iterrows():
-			nature, color = getNatureAndColor(row)
-			data.set_value(index, 'color', color)
-			data.set_value(index, 'nature', nature)
+		data = shapeData(data, ticker, interval)
 
 		data = data.T.to_dict().values()
 
 		return Response(data)
 
 
-class getPointer(APIView):
-	def post(self, request, format=None):
-		print request.data
-		multiplier = 2
-		if 'multiplier' in request.data:
-			multiplier = float(request.data['multiplier'])
-		if 'ticker' in request.data:
-			ticker = request.data['ticker']
-		else:
-			return Response('no ticker found', status=status.HTTP_400_BAD_REQUEST)
+# class getCurrentPrice(LoggingMixin, APIView):
+# 	def get(self, request, format=None):
+# 		interestObjects = userInterests.objects.filter(interested=True)
+# 		interestedTickers = []
+# 		for interest in interestObjects:
+# 			interestedTickers.append(interest.ticker.Code)
 
-		table_code = 'NSE/' + ticker
+# 		# Google finance can only handle 950 tickers at once, if favourite ticker count exceeds this, it has to be spliced and queried
+# 		tickerSpliceStart = 0
+# 		tickerSpliceEnd = 90
+# 		allTickersDone = False
+
+# 		currentPrice = {}
+# 		for ticker in interestedTickers:
+# 			currentPrice[ticker] = None
+
+# 		while not allTickersDone:
+# 			quoteList = googlefinance.getQuotes(interestedTickers[tickerSpliceStart:tickerSpliceEnd])
+# 			for quote in quoteList:
+# 				ticker = str(quote['StockSymbol'])
+# 				price = float(quote['LastTradePrice'].replace(',', ''))
+# 				currentPrice[ticker] = price
+
+# 			tickerSpliceStart = tickerSpliceEnd
+# 			tickerSpliceEnd = tickerSpliceEnd + 90
+
+# 			if tickerSpliceStart > len(interestedTickers):
+# 				allTickersDone = True
+
+# 		return Response(currentPrice)
+
+
+class getCurrentPrice(LoggingMixin, APIView):
+	def get(self, request, format=None):
+		interestObjects = userInterests.objects.filter(interested=True)
+		interestedTickers = []
+		for interest in interestObjects:
+			interestedTickers.append(interest.ticker.Code)
+
+		currentPrice = {}
+		for ticker in interestedTickers:
+			currentPrice[ticker] = None
+
+		for tickers in list(chunks(interestedTickers, 90)):
+			tickers = ['NSE:' + ticker.__str__() for ticker in tickers]
+			allTickerData = requests.get('http://finance.google.com/finance/info?client=ig&q=' + ','.join(tickers))
+			print allTickerData.content
+			allTickerData = json.loads(allTickerData.content.replace('\n', '').replace('//', ''))
+			
+			for tickerData in allTickerData:
+				currentPrice[tickerData['t']] = float(tickerData['l'].replace(',', ''))
+
+		return Response(currentPrice)
+
+
+class tickers(LoggingMixin, generics.ListCreateAPIView):
+	queryset = tickers.objects.all()
+	serializer_class = tickerSerializer
+
+
+class allPointers(LoggingMixin, generics.ListAPIView):
+	queryset = pointers.objects.all()
+	serializer_class = pointerSerializer
+
+	def get(self, request, format=None):
+		if 'interval' not in request.GET:
+			return Response('Please pass interval in query parameter', status=status.HTTP_400_BAD_REQUEST)
+		interval = request.GET['interval']
 		try:
-			startDate = datetime.strftime(datetime.now() - timedelta(days=365), '%Y-%m-%d')
-			endDate = datetime.strftime(datetime.now(), '%Y-%m-%d')
-			data = quandl.get(table_code, start_date=startDate, end_date=endDate)
-		except Exception:
-			return Response('Incorrect ticker', status=status.HTTP_400_BAD_REQUEST)
+		    ticker = request.GET['ticker']
+		    if not pointers.objects.filter(ticker=ticker, interval=interval).exists():
+		    	os.system('python jobs/DBUpdateScript.py ' + ticker)
+		    pointer = pointers.objects.get(ticker=ticker, interval=interval)
+		    return Response(pointerSerializer(pointer).data)
+		except Exception as e:
+			print e
+			interestObjects = userInterests.objects.filter(interested=True)
+			interestedTickers = []
+			for interest in interestObjects:
+				interestedTickers.append(interest.ticker.Code)
 
-		data.reset_index(inplace=True)
-		data.drop(['Last', 'Total Trade Quantity', 'Turnover (Lacs)'], axis=1, inplace=True)
-		data = data.iloc[::-1]
-		data.reset_index(inplace=True)
+			interestedPointers = pointers.objects.filter(ticker__in=interestedTickers, interval=interval)
+			return Response(pointerSerializer(interestedPointers, many=True).data)
 
-		P1 = False
-		P2 = False
-		P3 = False
-		P1index = None
-		P2index = None
-		P3index = None
 
-		for index, row in data.iterrows():
-			nature, color = getNatureAndColor(row)
-
-			# if lowAfterEntry is None or row.Low < lowAfterEntry:
-			# 	lowAfterEntry = row.Low
-
-			data.set_value(index, 'color', color)
-			data.set_value(index, 'nature', nature)
-
-			if not P1:
-				if color == 'green' and nature == 'exciting':
-					P1 = True
-					P1index = index
-					continue
-
-			if P1 and not P2:
-				if nature == 'boring' and index == (P1index + 1):
-					P2 = True
-					P2index = index
-					continue
-				else:
-					P1 = False
-					P1index = None
-
-			if P1 and P2 and not P3:
-				if nature == 'exciting':
-					P3 = True
-					P3index = index
-					continue
-
-			if P1 and P2 and P3:
-				break
-
-		if not P1 and not P2 and not P3:
-			return Response({'entry': None, 'stopLoss': None, 'target': None})
-
-		# if index == len(data) - 1:
-		# 	endOfDataHit = True
-
-		# print P1index
-		# print data.loc[[P1index]]
-		# print P2index
-		# print data.loc[[P2index]]
-		# print P3index
-		# print data.loc[[P3index]]
-		# print 'pointers found'
-
-		# pointers found, now to find the data
-		entry = 0
-		entry_at_index = 0
-		for index, row in data[P2index:P3index].iterrows():
-			if row.nature == 'boring':
-				# entry_at_index = row.High
-				entry_at_index = max(row.Open, row.Close)
-				if entry_at_index > entry:
-					entry = float(entry_at_index)
-
-		stopLoss = None
-		stopLossAtIndex = 0
-		#stopLossIndex = 0
-		for index, row in data[P1index:P3index].iterrows():
-			# if (row.color == 'green' and row.nature == 'exciting') or (row.nature == 'boring'):
-			stopLossAtIndex = row.Low
-			if stopLoss is None or stopLossAtIndex < stopLoss:
-				stopLoss = float(stopLossAtIndex)
-			# print stopLoss
-
-		target = ((entry - stopLoss) * multiplier) + entry
-
-		data_to_return = {'entry': entry, 'stopLoss': stopLoss, 'target': target}
-
-		return Response(data_to_return)
+class userInterestList(LoggingMixin, ListBulkCreateUpdateDestroyAPIView):
+	queryset = userInterests.objects.all()
+	serializer_class = userInterestSerializer

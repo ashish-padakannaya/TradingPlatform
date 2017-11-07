@@ -2,8 +2,12 @@ from django.conf.urls import url
 from stockapi import views
 
 urlpatterns = [
-    url(r'^stocks/$', views.getAllStocks.as_view()),
     url(r'^stock/$', views.getStock.as_view()),
-    url(r'^pointers/$', views.getPointer.as_view()),
-    url(r'^createUser/$', views.createUser.as_view())
+    url(r'^getPopularTickers/$', views.getPopularTickers.as_view()),
+    url(r'^userInterests/$', views.userInterestList.as_view()),
+    url(r'^stocks/$', views.tickers.as_view()),
+    url(r'^pointers/$', views.allPointers.as_view()),
+    # url(r'^getCurrentPrice/$', views.getCurrentPrice.as_view()),
+    url(r'^getCurrentPrice/$', views.getCurrentPrice.as_view())
+    # url(r'^pointers2/$', views.getPointer.as_view())
 ]
