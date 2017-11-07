@@ -3,10 +3,10 @@ import os
 try:
     if os.environ['DJANGOENV'] == 'prod':
 		print 'running PROD'
-		database = 'd41hn3nmqj59mj'
-		user = 'cxuazrriajgxck'
-		password = '82148144f1b692e97575a0032adfb8da72ba7abcb4ce6fdd952117055758703a'
-		host = 'ec2-54-235-119-27.compute-1.amazonaws.com'
+		database = 'd9aigals9rapf5'
+		user = 'lzxjlsyjaxpyyj'
+		password = '19c915a470a3c43c8dde4e398d787ecb770a9bbd43ebffc5e18741accf178ad5'
+		host = 'ec2-184-72-255-211.compute-1.amazonaws.com'
 
     if os.environ['DJANGOENV'] == 'qa':
         print 'running QA'
