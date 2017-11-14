@@ -200,10 +200,10 @@ AUTH_PASSWORD_VALIDATORS = [
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_USE_TLS = True
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST = 'smtp.sendgrid.net'
 EMAIL_PORT = 25
-EMAIL_HOST_USER = 'infinv.investments@gmail.com'
-EMAIL_HOST_PASSWORD = 'infinv123'
+EMAIL_HOST_USER = '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'
+EMAIL_HOST_PASSWORD = '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'
 
 # DJOSER = {
 #     'ACTIVATION_URL': '#!/activateUser/?uid={uid}&token={token}',
