@@ -203,7 +203,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.sendgrid.net'
 EMAIL_PORT = 25
 EMAIL_HOST_USER = 'apikey'
-EMAIL_HOST_PASSWORD = '..'
+EMAIL_HOST_PASSWORD = os.environ['SENDGRID_API_TOKEN']
 
 # DJOSER = {
 #     'ACTIVATION_URL': '#!/activateUser/?uid={uid}&token={token}',
