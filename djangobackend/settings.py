@@ -128,7 +128,7 @@ if BASE_CAMP == 'prod':
         'SERIALIZERS': {},
         'PASSWORD_RESET_CONFIRM_URL': '#/password-reset?uid={uid}&token={token}',
         'SITE_NAME': 'Infinv Investments',
-        'DOMAIN': 'infinv.in'
+        'DOMAIN': 'analysestock-prod.herokuapp.com'
     }
 
 #QA
