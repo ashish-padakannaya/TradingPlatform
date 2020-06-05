@@ -2,7 +2,7 @@ appdirs==1.4.3
 asn1crypto==0.22.0
 cffi==1.10.0
 cryptography==1.8.1
-Django==1.11
+Django==1.11.29
 django-cors-headers==2.0.2
 django-filter==1.0.2
 djangorestframework==3.4.6
