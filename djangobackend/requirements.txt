@@ -19,7 +19,7 @@ colorama==0.2.5
 configparser==3.5.0
 contextlib2==0.5.4
 crab==0.5.0
-cryptography==1.8.1
+cryptography==3.2
 cvxopt==1.1.8
 decorator==4.0.11
 dj-database-url==0.4.2
