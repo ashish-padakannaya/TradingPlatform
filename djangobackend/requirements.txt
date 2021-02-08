@@ -42,7 +42,7 @@ googlefinance==0.7
 GraphLab-Create==2.1
 gspread==0.4.1
 gunicorn==19.6.0
-httplib2==0.9.2
+httplib2==0.19.0
 idna==2.5
 image==1.5.5
 inflection==0.3.1
