@@ -103,7 +103,7 @@ raven==6.0.0
 requests==2.13.0
 requests-oauthlib==0.6.2
 requests-toolbelt==0.7.0
-rsa==3.1.2
+rsa==4.7
 scandir==1.5
 scikit-learn==0.18.1
 scikits.learn==0.8.1
