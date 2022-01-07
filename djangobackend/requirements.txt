@@ -20,7 +20,7 @@ configparser==3.5.0
 contextlib2==0.5.4
 crab==0.5.0
 cryptography==1.8.1
-cvxopt==1.1.8
+cvxopt==1.2.7
 decorator==4.0.11
 dj-database-url==0.4.2
 Django==1.11
