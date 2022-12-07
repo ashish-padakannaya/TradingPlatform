@@ -12,7 +12,7 @@ beautifulsoup4==4.5.1
 boto==2.33.0
 botocore==0.73.0
 bs4==0.0.1
-certifi==2017.4.17
+certifi==2022.12.7
 cffi==1.10.0
 click==6.6
 colorama==0.2.5
